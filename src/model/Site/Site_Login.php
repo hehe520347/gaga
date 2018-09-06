@@ -20,62 +20,51 @@ class Site_Login
         $this->pinyin = new \Overtrue\Pinyin\Pinyin();
     }
 
+    /**
+     * 站点登陆逻辑
+     *  1. presessionId(客户端提供)，站点通过presessionId调用平台，获取用户信息
+     *  2. 获取用户登陆信息，进行站点本地登陆逻辑
+     *  3. 构建Response返回
+     */
+
+    /**
+     * @param $preSessionId
+     * @param string $devicePubkPem
+     * @return array
+     * @throws Exception
+     */
     public function checkPreSessionIdFromPlatform($preSessionId, $devicePubkPem = "")
     {
 
         try {
             //get site config::publicKey
             $sitePriKeyPem = $this->getSiteConfigPriKeyFromDB();
-            $this->ctx->Wpf_Logger->info("api.login", "check preSession prikPem=" . $sitePriKeyPem);
+
             //get userProfile from platform
             $loginUserProfile = $this->getUserProfileFromPlatform($preSessionId, $sitePriKeyPem);
 
-            $this->ctx->Wpf_Logger->info("api.login", "get profile from platform =" . $loginUserProfile->getUserId());
-            $this->ctx->Wpf_Logger->info("api.login", "get profile from platform =" . $loginUserProfile->getLoginName());
-            $this->ctx->Wpf_Logger->info("api.login", "get profile from platform =" . $loginUserProfile->getNickname());
+            $this->ctx->Wpf_Logger->info("api.site.login->api.session.verify", "profile=" . json_encode($loginUserProfile));
 
-            $userProfile = $this->handleUserProfile($loginUserProfile, $devicePubkPem);
+            //get intivation first
+            $uicInfo = $this->getIntivationCode($loginUserProfile->getInvitationCode());
+
+            $userProfile = $this->doSiteLoginAction($loginUserProfile, $devicePubkPem, $uicInfo);
+
+            //set site owner
+            $this->checkAndSetSiteOwner($userProfile['userId'], $uicInfo);
+
             return $userProfile;
         } catch (Exception $ex) {
             $tag = __CLASS__ . "-" . __FUNCTION__;
             $this->ctx->Wpf_Logger->error($tag, " errorMsg = " . $ex->getMessage());
-            throw new Exception($ex->getMessage());
+            throw new Exception($ex);
         }
     }
 
-    private function handleUserProfile($loginUserProfile, $devicePubkPem)
-    {
-
-
-        if (!$loginUserProfile) {
-            $errorCode = $this->zalyError->errorSession;
-            $errorInfo = $this->zalyError->getErrorInfo($errorCode);
-            throw new Exception($errorInfo);
-        }
-        $nameInLatin = $this->pinyin->permalink($loginUserProfile->getNickName(), "");
-
-        $userProfile = [
-            "userId" => $loginUserProfile->getUserId(),
-            "loginName" => $loginUserProfile->getLoginName(),
-            "nickname" => $loginUserProfile->getNickname(),
-            "countryCode" => "+86",
-            "loginNameLowercase" => strtolower($loginUserProfile->getLoginName()),
-            "nicknameInLatin" => $nameInLatin,
-            "phoneId" => $loginUserProfile->getPhoneNumber(),
-            "timeReg" => $this->ctx->ZalyHelper->getMsectime()
-        ];
-        $user = $this->checkUserExists($userProfile);
-        if (!$user) {
-            $userProfile['availableType'] = \Zaly\Proto\Core\UserAvailableType::UserAvailableNormal;
-            $this->insertUser($userProfile);
-        }
-
-        //这里
-        $sessionId = $this->insertOrUpdateUserSession($userProfile, $devicePubkPem);
-        $userProfile['sessionId'] = $sessionId;
-        return $userProfile;
-    }
-
+    /**
+     * 获取站点设置
+     * @return string
+     */
     private function getSiteConfigPriKeyFromDB()
     {
         try {
@@ -109,10 +98,10 @@ class Site_Login
 
             $sessionVerifyUrl = ZalyConfig::getSessionVerifyUrl($pluginId);
 
-            $this->ctx->Wpf_Logger->info("api.login", "get profile from platform url=" . $sessionVerifyUrl);
+            $this->ctx->Wpf_Logger->error("api.site.login", "get profile from platform url=" . $sessionVerifyUrl);
 
             $result = $this->ctx->ZalyCurl->request("post", $sessionVerifyUrl, $data);
-            $this->ctx->Wpf_Logger->info("api.login", "get profile from platform result=" . $result);
+            $this->ctx->Wpf_Logger->info("api.site.login", "get profile from platform result=" . $result);
 
 
             //解析数据
@@ -144,9 +133,70 @@ class Site_Login
         } catch (Exception $ex) {
             $errorCode = $this->zalyError->errorSession;
             $errorInfo = $this->zalyError->getErrorInfo($errorCode);
-            $this->ctx->Wpf_Logger->error($tag, "api.site.login error=" . $ex->getMessage());
+            $this->ctx->Wpf_Logger->error($tag, "api.site.login error=" . $ex);
             throw new Exception($errorInfo);
         }
+    }
+
+    /**
+     * 处理站点登陆具体逻辑
+     *
+     * @param Zaly\Proto\Platform\LoginUserProfile $loginUserProfile
+     * @param $devicePubkPem
+     * @param $uicInfo
+     * @return array
+     * @throws Exception
+     */
+    private function doSiteLoginAction($loginUserProfile, $devicePubkPem, $uicInfo)
+    {
+        if (!$loginUserProfile) {
+            $errorCode = $this->zalyError->errorSession;
+            $errorInfo = $this->zalyError->getErrorInfo($errorCode);
+            throw new Exception($errorInfo);
+        }
+        $nameInLatin = $this->pinyin->permalink($loginUserProfile->getNickName(), "");
+
+        $countryCode = $loginUserProfile->getPhoneCountryCode();
+
+        if (!$countryCode) {
+            $countryCode = "86";
+        }
+
+        $userProfile = [
+            "userId" => $loginUserProfile->getUserId(),
+            "loginName" => $loginUserProfile->getLoginName(),
+            "nickname" => $loginUserProfile->getNickname(),
+            "countryCode" => $countryCode,
+            "loginNameLowercase" => strtolower($loginUserProfile->getLoginName()),
+            "nicknameInLatin" => $nameInLatin,
+            "phoneId" => $loginUserProfile->getPhoneNumber(),
+            "timeReg" => $this->ctx->ZalyHelper->getMsectime(),
+        ];
+
+        $user = $this->checkUserExists($userProfile);
+        if (!$user) {
+            //no user ,register new user
+            //check user invitation code and realName for phonenumber
+            $this->verifyUicAndRealName($loginUserProfile->getUserId(), $loginUserProfile->getPhoneNumber(), $uicInfo);
+
+            //save profile to db
+            $userProfile['availableType'] = \Zaly\Proto\Core\UserAvailableType::UserAvailableNormal;
+            $this->insertSiteUserProfile($userProfile);
+
+        }
+
+        //这里
+        $sessionId = $this->insertOrUpdateUserSession($userProfile, $devicePubkPem);
+        $userProfile['sessionId'] = $sessionId;
+        return $userProfile;
+    }
+
+    private function getIntivationCode($invitationCode)
+    {
+        if (empty($invitationCode)) {
+            return false;
+        }
+        return $this->ctx->SiteUicTable->queryUicByCode($invitationCode);
     }
 
     private function checkUserExists($userProfile)
@@ -159,16 +209,57 @@ class Site_Login
         }
     }
 
-    private function insertUser($userProfile)
+    /**
+     * @param $userId
+     * @param $phoneNumber
+     * @param $uicInfo
+     * @throws Exception
+     */
+    private function verifyUicAndRealName($userId, $phoneNumber, $uicInfo)
     {
-        //getInvitationCode()
+        $configKeys = [SiteConfig::SITE_ENABLE_INVITATION_CODE, SiteConfig::SITE_ENABLE_REAL_NAME];
+        $config = $this->ctx->SiteConfigTable->selectSiteConfig($configKeys);
+
+        if ($config[SiteConfig::SITE_ENABLE_INVITATION_CODE]) {
+
+            if (empty($uicInfo) || $uicInfo['status'] == 0 || $uicInfo['userId']) {
+                throw new Exception("invitation code is error");
+            }
+
+            //update uic used
+            $this->ctx->SiteUicTable->updateUicUsed($uicInfo['code'], $userId);
+        }
+
+        if ($config[SiteConfig::SITE_ENABLE_REAL_NAME]) {
+            if (!$phoneNumber || !ZalyHelper::isPhoneNumber($phoneNumber)) {
+                throw new Exception("phone number is error");
+            }
+        }
+    }
+
+    /**
+     * save user profile
+     *
+     * @param $userProfile
+     * @return bool
+     * @throws Exception
+     */
+    private function insertSiteUserProfile($userProfile)
+    {
         try {
-            $this->ctx->SiteUserTable->insertUserInfo($userProfile);
+            return $this->ctx->SiteUserTable->insertUserInfo($userProfile);
         } catch (Exception $e) {
             throw new Exception("insert user is fail");
         }
     }
 
+    /**
+     * 更新站点session
+     *
+     * @param $userProfile
+     * @param $devicePubkPem
+     * @return string
+     */
     private function insertOrUpdateUserSession($userProfile, $devicePubkPem)
     {
         $sessionId = $this->ctx->ZalyHelper->generateStrId();
@@ -206,5 +297,26 @@ class Site_Login
             $this->ctx->SiteSessionTable->updateSessionInfo($where, $sessionInfo);
         }
         return $sessionId;
+    }
+
+    /**
+     * @param $userId
+     * @param $uicInfo
+     */
+    private function checkAndSetSiteOwner($userId, $uicInfo)
+    {
+        $siteOwner = $this->ctx->Site_Config->getSiteOwner();
+
+        if (empty($siteOwner)) {
+            $this->ctx->Wpf_Logger->info("api.site.login", "uic info=" . json_encode($uicInfo));
+            if ($uicInfo && $uicInfo['status'] == 100) {
+                //set site owner
+                $this->ctx->SiteConfigTable->updateSiteConfig(SiteConfig::SITE_OWNER, $userId);
+
+                //update config realName = false
+                $this->ctx->SiteConfigTable->updateSiteConfig(SiteConfig::SITE_ENABLE_INVITATION_CODE, 0);
+            }
+
+        }
     }
 }

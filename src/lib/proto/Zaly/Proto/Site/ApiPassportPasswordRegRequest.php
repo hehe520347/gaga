@@ -37,23 +37,14 @@ class ApiPassportPasswordRegRequest extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>string sitePubkPem = 5;</code>
      */
     private $sitePubkPem = '';
-
     /**
-     * Constructor.
-     *
-     * @param array $data {
-     *     Optional. Data for populating the Message object.
-     *
-     *     @type string $loginName
-     *     @type string $password
-     *     @type string $email
-     *     @type string $nickname
-     *     @type string $sitePubkPem
-     * }
+     * Generated from protobuf field <code>string invitationCode = 6;</code>
      */
-    public function __construct($data = NULL) {
+    private $invitationCode = '';
+
+    public function __construct() {
         \GPBMetadata\Site\ApiPassportPasswordReg::initOnce();
-        parent::__construct($data);
+        parent::__construct();
     }
 
     /**
@@ -162,6 +153,28 @@ class ApiPassportPasswordRegRequest extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->sitePubkPem = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>string invitationCode = 6;</code>
+     * @return string
+     */
+    public function getInvitationCode()
+    {
+        return $this->invitationCode;
+    }
+
+    /**
+     * Generated from protobuf field <code>string invitationCode = 6;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setInvitationCode($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->invitationCode = $var;
 
         return $this;
     }

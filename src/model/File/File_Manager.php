@@ -7,6 +7,7 @@ class File_Manager
     private $mimeConfig = array(
         "image/png" => "png",
         "image/jpeg" => "jpeg",
+        "image/jpg" => "jpg",
         "image/gif" => "gif",
 //        "image/bmp" => "bmp",
 //        "audio/mp4" => "mp4",
@@ -18,6 +19,11 @@ class File_Manager
         "image/jpg",
         "image/png",
     ];
+
+    public function __construct()
+    {
+        $this->wpf_Logger = new Wpf_Logger();
+    }
 
     public function getPath($dateDir, $fileId)
     {
@@ -41,6 +47,18 @@ class File_Manager
         return file_get_contents($path);
     }
 
+    public function contentType($fileId) {
+        if (strlen($fileId) < 1) {
+            return "";
+        }
+        // 需要hash目录，防止单目录文件过多
+        $fileName = explode("-", $fileId);
+        $dirName = $fileName[0];
+        $fileId = $fileName[1];
+        $path = $this->getPath($dirName, $fileId);
+        return mime_content_type($path);
+    }
+
     public function saveFile($content)
     {
         $dateDir = date("Ymd");
@@ -51,7 +69,7 @@ class File_Manager
         file_put_contents($path, $content);
 
         $mime = mime_content_type($path);
-        error_log("shaoye return  mime---" . $mime);
+
         if (!in_array($mime, $this->defaultImgType)) {
             throw new Exception("file type error");
         }
@@ -64,7 +82,6 @@ class File_Manager
 
         return $dateDir . "-" . $fileName;
     }
-
 
     public function buildGroupAvatar($fileIdList = array())
     {
@@ -83,7 +100,6 @@ class File_Manager
         $dateDir = date("Ymd");
         $fileName = sha1(uniqid()) . "." . "jpeg";
         $groupImagePath = $this->getPath($dateDir, $fileName);
-
 
         $gorupAvatarPath = $this->splicingGroupAvatar($picList, $groupImagePath);
 
@@ -110,7 +126,7 @@ class File_Manager
             $fileName = $fileNameArray[1];
             return $this->getPath($dirName, $fileName);
         } catch (Exception $e) {
-            (new Wpf_Logger())->error($tag, $e);
+            $this->wpf_Logger->error($tag, $e->getMessage());
         }
         return null;
     }
@@ -125,8 +141,9 @@ class File_Manager
      */
     private function splicingGroupAvatar($picList = array(), $outImagePath)
     {
+        $tag = __CLASS__.'-'.__FUNCTION__;
         if (!function_exists("imagecreatetruecolor")) {
-            error_log("php need support gd library, please check local php environment");
+            $this->wpf_Logger->error($tag, "php need support gd library, please check local php environment");
             return null;
         }
 
@@ -233,14 +250,13 @@ class File_Manager
             }
             $resource = false;
             $mime = mime_content_type($pic_path);
-            error_log("shaoye image mime--" . $mime . "  pic_path ==" . $pic_path);
 
             if ($mime == "image/jpg" | $mime == "image/jpeg") {
                 $resource = imagecreatefromjpeg($pic_path);
             } else if ($mime == "image/png") {
                 $resource = imagecreatefrompng($pic_path);
             } else {
-                error_log("unsupport image type [" . $mime . "]");
+                $this->wpf_Logger->error($tag, "unsupport image type [" . $mime . "]");
             }
             if ($resource == false) {
                 continue;

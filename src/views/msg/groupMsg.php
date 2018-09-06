@@ -9,11 +9,13 @@
     <link rel="stylesheet" href="../../public/css/zaly_apply_friend_list.css" />
     <link rel="stylesheet" href="../../public/css/hint.min.css">
     <link rel="stylesheet" href="../../public/css/zaly_msg.css" />
+    <link rel="stylesheet" media="(max-height: 650px)" href="../../public/css/zaly_media.css" />
 
     <script src="../../public/js/jquery.min.js"></script>
     <script src="../../public/js/template-web.js"></script>
     <script src="../../public/js/jquery.i18n.properties.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
 </head>
 
 <body>
@@ -42,9 +44,9 @@
 <script src="../../public/js/im/zalyClient.js"></script>
 <script src="../../public/js/im/zalyBaseWs.js"></script>
 <script src="../../public/js/im/zalyIm.js"></script>
-<script src="../../public/js/im/zalyGroupMsg.js"></script>
 <script src="../../public/js/im/zalyMsg.js"></script>
-<script src="../../public/js/im/zalyjsNative.js"></script>
+<script src="../../public/js/im/zalyGroupMsg.js"></script>
+<script src="../../public/js/zalyjsNative.js"></script>
 <script src="../../public/js/im/zalyHelper.js"></script>
 <script src="../../public/js/qrcode.js" ></script>
 <script src="../../public/js/utf.js" ></script>
@@ -53,18 +55,29 @@
 <script type="text/javascript">
 
     $(window).resize(function () {
+        setFontSize();
+    });
+    setFontSize();
+    function setFontSize()
+    {
+        var rem = getRemPx();
+        $('html').css('font-size', rem + "px");
+    }
+
+    function getRemPx()
+    {
         var whdef = 10.66/1440;// 1440,使用10.66PX的默认值
         var wW = window.innerWidth;// 当前窗口的宽度
         var rem = wW * whdef;// 以默认比例值乘以当前窗口宽度,得到该宽度下的相应FONT-SIZE值
+        console.log("rem ==" + rem);
         if(rem < 8) {
             rem = 8;
         }
         if(rem > 10.66) {
             rem = 10.66;
         }
-
-        $('html').css('font-size', rem + "px");
-    });
+        return rem;
+    }
 
     requestSiteConfig(ZalyIm);
 

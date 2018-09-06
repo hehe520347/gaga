@@ -23,6 +23,9 @@ abstract class ManageController extends \Wpf_Controller
 
     protected $ctx;
 
+    protected $language = Zaly\Proto\Core\UserClientLangType::UserClientLangEN;
+    protected $requestData;
+
     public function __construct(Wpf_Ctx $context)
     {
         $this->ctx = new BaseCtx();
@@ -40,19 +43,14 @@ abstract class ManageController extends \Wpf_Controller
 
         try {
             parent::doIndex();
-//            $preSessionId = isset($_GET['preSessionId']) ? $_GET['preSessionId'] : "";
-//            if ($preSessionId) {
-//                $preSessionId = isset($_GET['preSessionId']) ? $_GET['preSessionId'] : "";
-//                if ($preSessionId) {
-//                    $apiPageIndex = ZalyConfig::getApiPageIndexUrl();
-//                    $userProfile = $this->ctx->Site_Login->checkPreSessionId($preSessionId);
-//                    $userId = $userProfile["userId"];
-//                    $this->setCookieBase64($userId);
-//                    header("Location:" . $apiPageIndex);
-//                    exit();
-//                }
-//            }
-//            $this->getUserIdByCookie();
+
+            // 接收的数据流
+            $this->requestData = file_get_contents("php://input");
+
+
+
+            $this->getAndSetClientLang();
+
             $this->doRequest();
         } catch (Exception $ex) {
             $this->ctx->Wpf_Logger->error($tag, "error msg =" . $ex->getMessage());
@@ -124,9 +122,9 @@ abstract class ManageController extends \Wpf_Controller
         // 自己实现实现一下这个方法，加载view目录下的文件
         $params['session_id'] = $this->sessionId;
         $params['user_id'] = $this->userId;
-        $params['platform_login_url'] = ZalyConfig::getConfig("apiPlatformLogin");
-        $params['nickname'] = $this->userInfo['nickname'];
-        $params['avatar'] = $this->userInfo['avatar'];
+//        $params['platform_login_url'] = ZalyConfig::getConfig("apiPlatformLogin");
+//        $params['nickname'] = $this->userInfo['nickname'];
+//        $params['avatar'] = $this->userInfo['avatar'];
         return parent::display($viewName, $params);
     }
 
@@ -137,4 +135,14 @@ abstract class ManageController extends \Wpf_Controller
         $cookieBase64 = base64_encode($cookieAes);
         setcookie("zaly_site_user", $cookieBase64, time() + $this->sessionIdTimeOut, "/", "", false, true);
     }
+
+    protected function getAndSetClientLang()
+    {
+        $headLang = $_GET['lang'];
+
+        if (isset($headLang) && $headLang == Zaly\Proto\Core\UserClientLangType::UserClientLangZH) {
+            $this->language = Zaly\Proto\Core\UserClientLangType::UserClientLangZH;
+        }
+    }
+
 }

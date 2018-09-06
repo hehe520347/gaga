@@ -22,7 +22,6 @@ abstract class  ZalyErrorBase
     public $errorGroupNameLength = "error.group.name.length";
     public $errorGroupCreatePermission = "error.group.create.permission";
     public $errorGroupCreate  = "error.group.create";
-    public $errorGroupInfo    = "error.group.info";
     public $errorGroupExist   = "error.group.exist";
     public $errorGroupOwner   = "error.group.owner";
     public $errorGroupAdmin   = "error.group.admin";
@@ -37,13 +36,10 @@ abstract class  ZalyErrorBase
     public $errorGroupRemoveUserId  = "error.group.remove.userId";
     public $errorGroupRemoveMemberType = "error.group.remove.memberType";
     public $errorGroupRemove = "error.group.remove";
-    public $errorGroupProfileUpdate = "error.group.profileUpdate";
-    public $errorGroupUpdateNameLength = "error.group.update.nameLength";
 
     public $errorGroupQuitOwner = "error.group.quitOwner";
     public $errorGroupQuit = "error.group.quit";
 
-    public $errorGroupMemberGroupId = "error.group.groupMember.groupId";
     public $errorGroupUpdate = "error.group.update";
 
     public $errorFriendApply = "error.friend.apply";
@@ -53,9 +49,13 @@ abstract class  ZalyErrorBase
 
     public $errorFileDownload = "error.file.download";
 
-    public $errorInvalidEmail = "error.invalid.email";
-    public $errorExistEmail   = "error.exist.email";
+    public $errorInvalidEmail   = "error.invalid.email";
+    public $errorExistEmail     = "error.exist.email";
     public $errorExistLoginName = "error.exist.loginName";
+
+    public $errorLoginNameLength = "error.loginName.length";
+    public $errorPassowrdLength = "error.password.length";
+    public $errorNicknameLength = "error.nickname.length";
 
     public $errorMatchLogin = "error.match.login";
     public $errorExistUser = "error.exist.user";

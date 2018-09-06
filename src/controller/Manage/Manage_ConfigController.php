@@ -13,8 +13,12 @@ class Manage_ConfigController extends ManageController
      */
     public function doRequest()
     {
-        $this->ctx->Wpf_Logger->info("1111111", 'mange index');
-        echo $this->display("manage_siteConfigIndex");
+
+        $config = $this->ctx->SiteConfigTable->selectSiteConfig();
+        $config[SiteConfig::SITE_ID_PRIK_PEM] = "";
+        $config['lang'] = $this->language;
+
+        echo $this->display("manage_config_index", $config);
         return;
     }
 

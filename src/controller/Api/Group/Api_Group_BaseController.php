@@ -128,9 +128,9 @@ class Api_Group_BaseController extends BaseController
 
     protected function getPublicGroupProfile($group)
     {
-        $descType = $group['descriptionType'] == 0 ?
-            \Zaly\Proto\Core\GroupDescriptionType::GroupDescriptionText :
-            \Zaly\Proto\Core\GroupDescriptionType::GroupDescriptionMarkdown;
+        $descType = isset($group['descriptionType']) && $group['descriptionType'] == 1 ?
+            \Zaly\Proto\Core\GroupDescriptionType::GroupDescriptionMarkdown :
+            \Zaly\Proto\Core\GroupDescriptionType::GroupDescriptionText;
 
         $groupDescription = new \Zaly\Proto\Core\GroupDescription();
         $groupDescription->setBody($group['description']);

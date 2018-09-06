@@ -63,6 +63,22 @@ class ZalyHelper
         return $str;
     }
 
+
+    public static function generateNumberKey($length = 16, $strParams = '0123456789')
+    {
+        if (!is_int($length) || $length < 0) {
+            $length = 16;
+        }
+
+        $str = '';
+        for ($i = $length; $i > 0; $i--) {
+            $str .= $strParams[mt_rand(0, strlen($strParams) - 1)];
+        }
+
+        return $str;
+    }
+
+
     public function judgeOrigin()
     {
         //获取USER AGENT
@@ -116,14 +132,19 @@ class ZalyHelper
 
     public static function checkOpensslEncryptExists()
     {
-        if(!function_exists("openssl_encrypt")) {
+        if (!function_exists("openssl_encrypt")) {
             return false;
         }
         return true;
     }
 
-    public static  function isEmail($email)
+    public static function isEmail($email)
     {
-        return preg_match("/([\w\-]+\@[\w\-]+\.[\w\-]+)/",$email);
+        return preg_match("/([\w\-]+\@[\w\-]+\.[\w\-]+)/", $email);
+    }
+
+    public static function isPhoneNumber($phoneNumber)
+    {
+        return preg_match("/^1[3456789]{1}\d{9}$/", $phoneNumber);
     }
 }

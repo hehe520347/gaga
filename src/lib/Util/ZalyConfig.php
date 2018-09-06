@@ -6,15 +6,17 @@
  * Time: 10:54 AM
  */
 
-require dirname(__FILE__) ."/../../config.php";
 class ZalyConfig
 {
     public static $config;
     private static $verifySessionKey="session_verify_";
-
     public static function getConfigFile()
     {
         $fileName = dirname(__FILE__) ."/../../config.php";
+        if(!file_exists($fileName)) {
+            $fileName = dirname(__FILE__) ."/../../config.sample.php";
+        }
+
         self::$config = require($fileName);
     }
 
@@ -38,6 +40,12 @@ class ZalyConfig
     {
         $domain = self::getDomain();
         return $domain.self::$config['apiPageIndex'];
+    }
+
+    public static function getApiPageJumpUrl()
+    {
+        $domain = self::getDomain();
+        return $domain.self::$config['apiPageJump'];
     }
 
     public static function getApiPageWidget()
@@ -78,5 +86,11 @@ class ZalyConfig
     {
         $domain = self::getDomain();
         return $domain.self::$config['apiPageLogout'];
+    }
+
+    public static function getApiPageSiteInit()
+    {
+        $domain = self::getDomain();
+        return $domain.self::$config['apiPageSiteInit'];
     }
 }

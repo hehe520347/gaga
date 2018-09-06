@@ -43,6 +43,7 @@ class Api_Passport_PasswordLoginController extends BaseController
     private function  verifyUserInfo($loginName, $password)
     {
         $user = $this->ctx->PassportPasswordTable->getUserByLoginName($loginName);
+
         if(!$user) {
                 $errorCode = $this->zalyError->errorExistUser;
                 $errorInfo = $this->zalyError->getErrorInfo($errorCode);

@@ -66,6 +66,7 @@ function handleImSendRequest(action, reqData, callback)
         var header = {};
         header[HeaderSessionid] = sessionId;
         header[HeaderHostUrl] = originDomain;
+        header[HeaderUserClientLang] = languageName = navigator.language == "en-US" ? "0" : "1";
 
         var packageId = localStorage.getItem(PACKAGE_ID);
 
@@ -88,7 +89,12 @@ function handleImSendRequest(action, reqData, callback)
                 url:requestUrl,
                 // dataType:"json",
                 data: transportDataJson,
-                success:function (resp) {
+                success:function (resp, status, request) {
+                    // console.log("status ==" + status);
+                    var debugInfo = request.getResponseHeader('duckchat-debugInfo');
+                    if(debugInfo != null) {
+                        console.log("debug-info ==" + debugInfo);
+                    }
                     if(resp) {
                         handleReceivedImMessage(resp, callback);
                     }

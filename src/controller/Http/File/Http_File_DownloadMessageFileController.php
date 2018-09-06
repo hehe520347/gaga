@@ -15,12 +15,11 @@ class Http_File_DownloadMessageFileController extends \HttpBaseController
         try{
             $fileId    = $_GET['fileId'];
 
-            $isGroupMessage = $_GET['isGroupMessage'];
+            $isGroupMessage = isset($_GET['isGroupMessage']) ? $_GET['isGroupMessage'] : "";
             $messageId = isset($_GET['messageId']) ? $_GET['messageId'] : "";
             $returnBase64 = $_GET['returnBase64'];
 
             if($messageId) {
-
                 if($isGroupMessage == true) {
                     $info = $this->ctx->SiteGroupMessageTable->checkUserCanLoadImg($messageId, $this->userId);
                     if(!$info) {
@@ -50,11 +49,12 @@ class Http_File_DownloadMessageFileController extends \HttpBaseController
             }
 
             $imgContent = $this->ctx->File_Manager->readFile($fileId);
+
             if(strlen($imgContent)<1) {
                 throw new Exception("load img void");
             }
             header('Cache-Control: max-age=86400, public');
-            header("Content-type:image/jpg");
+            header("Content-type:image/png");
 
             if($returnBase64) {
                 echo base64_decode($imgContent);

@@ -9,33 +9,35 @@
     <script type="text/javascript" src="../../public/js/jquery.min.js"></script>
     <script src="../../public/js/jquery.i18n.properties.min.js"></script>
     <script type="text/javascript" src="../../public/js/login/callback.js"></script>
-    <script src="../../public/js/login/zalyjsNative.js"></script>
+    <script src="../../public/js/zalyjsNative.js"></script>
+    <script src="../../public/js/template-web.js"></script>
+
 </head>
 <body>
 
 <div class="zaly_container" >
     <div class="zaly_login zaly_login_by_pwd" >
         <div class="login_input_div" >
-            <div class="d-flex flex-row justify-content-center margin-top5"style="text-align: center;">
+            <div class="d-flex flex-row justify-content-center margin-top5 login-header" style="text-align: center;">
                 <span class="login_phone_tip_font" data-local-value="loginTip">Login</span>
             </div>
 
             <div class=" d-flex flex-row justify-content-left login_name_div" >
                 <image src="../../public/img/login/loginName.png" class="img"/>
-                <input type="text" class="input_login_site  login_input_loginName"  data-local-placeholder="enterLoginNamePlaceholder" placeholder="Please Enter LoginName" >
+                <input type="text" class="input_login_site  login_input_loginName"  data-local-placeholder="loginNamePlaceholder" placeholder="Please Enter LoginName" >
+                <div class="clearLoginName" onclick="clearLoginName()"><image src="../../public/img/msg/btn-x.png" class="clearLoginName" style="width: 2rem;height:2rem;"/></div>
                 <div class="line"></div>
-
             </div>
 
             <div class="login_name_div" style="margin-top: 1rem;">
                 <image src="../../public/img/login/pwd.png" class="img"/>
                 <input type="password" class="input_login_site phone_num  login_input_pwd" data-local-placeholder="enterPasswordPlaceholder"  placeholder="Please Enter Password" >
-                <div class="pwd_div" onclick="changeImgByClickPwd()"><image src="../../public/img/login/hide_pwd.png" class="pwd" img_type="hide"/></div>
+                <div class="pwd_div" onclick="changeImgByClickPwd()"><image src="../../public/img/login/hide_pwd.png" class="pwd" img_type="hide" /></div>
                 <div class="line"></div>
             </div>
 
             <div class="d-flex flex-row justify-content-center ">
-                <button type="button" class="btn login_button " ><span class="span_btn_tip" data-local-value="loginTip">Login</span></button>
+                <button type="button" class="btn login_button" ><span class="span_btn_tip" data-local-value="loginTip">Login</span></button>
             </div>
 
             <div class="d-flex flex-row register_span_div" >
@@ -46,69 +48,26 @@
         </div>
     </div>
     <div class="zaly_login zaly_site_register zaly_site_register-pwd" style="display: none;">
-        <div class="login_input_div" >
-            <div class="d-flex flex-row justify-content-center"style="text-align: center;margin-top: 2rem;margin-bottom: 1rem;">
-                <span class="login_phone_tip_font" data-local-value="registerTip" >Register</span>
-            </div>
 
-            <div class=" d-flex flex-row justify-content-left login_name_div"  style="margin-top: 1rem;">
-                <image src="../../public/img/login/loginName.png" class="img"/>
-                <input type="text" id="register_input_loginName"  class="input_login_site  register_input_loginName"  data-local-placeholder="enterLoginNamePlaceholder" placeholder="Please Enter LoginName" >
-                <div class="line"></div>
-            </div>
-
-            <div class="login_name_div" style="margin-top: 1rem;">
-                <image src="../../public/img/login/pwd.png" class="img"/>
-                <input type="password" class="input_login_site register_input_pwd"  id="register_input_pwd" data-local-placeholder="enterPasswordPlaceholder"  placeholder="Please Enter Password"  >
-                <div class="pwd_div" onclick="changeImgByClickPwd()"><image src="../../public/img/login/hide_pwd.png" class="pwd" img_type="hide"/></div>
-                <div class="line"></div>
-            </div>
-
-            <div class="login_name_div" style="margin-top: 1rem;">
-                <image src="../../public/img/login/pwd.png" class="img"/>
-                <input type="password" class="input_login_site register_input_repwd"  id="register_input_repwd" data-local-placeholder="enterRepasswordPlaceholder"  placeholder="Please Enter Password Again"  >
-                <div class="repwd_div" onclick="changeImgByClickRepwd()"><image src="../../public/img/login/hide_pwd.png" class="pwd" img_type="hide"/></div>
-
-                <div class="line" ></div>
-            </div>
-
-            <div class="login_name_div" style="margin-top: 1rem;">
-                <image src="../../public/img/login/nickname.png" class="img"/>
-                <input type="text" class="input_login_site register_input_nickname"   id="register_input_nickname" data-local-placeholder="enterNicknamePlaceholder" placeholder="Please Enter Nickname"  >
-                <div class="line"></div>
-            </div>
-
-            <div class="login_name_div" style="margin-top: 1rem;">
-                <image src="../../public/img/login/email.png" class="img"/>
-                <input type="text" class="input_login_site register_input_email"  id="register_input_email" data-local-placeholder="enterEmailPlaceholder" placeholder="Please Enter Email" >
-                <div class="line"></div>
-            </div>
-
-            <div class="d-flex flex-row justify-content-center ">
-                <button type="button" class="btn register_button"><span class="span_btn_tip" data-local-value="loginTip">Register</span></button>
-            </div>
-
-            <div class="d-flex flex-row register_span_div login_span_div" >
-                <span style="color:rgba(153,153,153,1);" data-local-value="hasAccountTip">Has Account?</span>
-                <span onclick="registerForLogin()" data-local-value="loginTip">Login</span>
-            </div>
-        </div>
     </div>
     <div class="zaly_login zaly_site_register zaly_site_register-repwd" style="display: none;">
+        <div class="back">
+            <img src="../../public/img/back.png" style="margin-left: 2rem; width: 4rem;height:4rem; margin-top: 2rem;" onclick="returnLoginPage(); return false;"/>
+        </div>
         <div class="login_input_div" >
-            <div class="d-flex flex-row justify-content-center"style="text-align: center;margin-top: 8rem;">
+            <div class="d-flex flex-row justify-content-center login-header" style="text-align: center;margin-top: 8rem;">
                 <span class="login_phone_tip_font"  data-local-value="findPasswordTip">Find Password</span>
             </div>
 
-            <div class="login_name_div" style="margin-top: 1rem;">
+            <div class="login_name_div">
                 <image src="../../public/img/login/loginName.png" class="img"/>
-                <input type="text" class="input_login_site forget_input_loginName" data-local-placeholder="enterLoginNamePlaceholder" placeholder="Please Enter LoginName">
+                <input type="text" class="input_login_site forget_input_loginName" data-local-placeholder="loginNamePlaceholder" placeholder="Please Enter LoginName">
                 <div class="line"></div>
             </div>
 
             <div class=" d-flex flex-row justify-content-left login_name_div"  style="margin-top: 1rem;">
                 <image src="../../public/img/login/code.png" class="img"/>
-                <input type="text"  value="aa" class="input_login_site  forget_input_code" data-local-placeholder="enterVerifyCodePlaceholder"  placeholder="Please Enter Verify Code"  >
+                <input type="text"  value="" class="input_login_site  forget_input_code" data-local-placeholder="enterVerifyCodePlaceholder"  placeholder="Please Enter Verify Code"  >
                 <span class="get_verify_code" onclick="getVerifyCode()" data-local-value="getVerifyCodeTip" >Get Verify Code</span>
                 <div class="line"></div>
             </div>
@@ -132,7 +91,29 @@
             </div>
         </div>
     </div>
+
+    <div class="zaly_login zaly_site_register zaly_site_register-invitecode" style="display: none;">
+        <div class="back">
+            <img src="../../public/img/back.png" style="margin-left: 2rem; width: 4rem;height:4rem; margin-top: 2rem;" onclick="returnRegisterDiv(); return false;"/>
+        </div>
+        <div class="login_input_div" >
+            <div class="d-flex flex-row justify-content-center login-header"style="text-align: center;margin-top: 8rem;margin-bottom: 1rem;">
+                <span class="login_phone_tip_font" data-local-value="registerInvitationCodeTip" >输入邀请码</span>
+            </div>
+
+            <div class="code_div" style="margin-top: 8rem;">
+                <input type="text" class="input_login_site register_input_code" style="margin-left: 0rem;" data-local-placeholder="enterCodePlaceholder"  placeholder="Please Enter Code"  >
+                <div class="line" ></div>
+            </div>
+
+            <div class="d-flex flex-row justify-content-center " >
+                <button type="button" class="btn register_button" style="margin-top: 7rem;"><span class="span_btn_tip" data-local-value="registerBtnTip">Register</span></button>
+            </div>
+
+        </div>
+    </div>
 </div>
+<?php include(dirname(__DIR__) . '/login/template_login.php'); ?>
 
 <script src="../../public/js/im/zalyKey.js"></script>
 <script src="../../public/js/im/zalyAction.js"></script>
@@ -185,7 +166,7 @@
     originDomain = protocol+"//"+host+pathname;
 
     if(refererUrl != undefined && refererUrl.length>1) {
-        siteConfigJsUrl = originDomain+"?action=page.siteConfig&callback=zalyLoginConfig";
+        siteConfigJsUrl = "./index.php?action=page.siteConfig&callback=zalyLoginConfig";
         addJsByDynamic(siteConfigJsUrl);
     } else {
         zalyjsLoginConfig(zalyLoginConfig);
@@ -268,9 +249,43 @@
     function registerForPassportPassword()
     {
         // $(".input_login_site").val("")/**/;
+        var html = template("tpl-login-div", {
+            enableInvitationCode : enableInvitationCode
+        });
+        html = handleHtmlLanguage(html);
+        $(".zaly_site_register-pwd").html(html);
         $(".zaly_login_by_pwd")[0].style.display = "none";
         $(".zaly_site_register-pwd")[0].style.display = "block";
     }
+
+    function returnRegisterDiv() {
+        $(".zaly_site_register-pwd")[0].style.display = "block";
+        $(".zaly_site_register-invitecode")[0].style.display = "none";
+    }
+
+    function handleHtmlLanguage(html)
+    {
+
+        $(html).find("[data-local-placeholder]").each(function () {
+            var placeholderValue = $(this).attr("data-local-placeholder");
+            var placeholder = $(this).attr("placeholder");
+            var newPlaceholder = $.i18n.map[placeholderValue];
+            html = html.replace(placeholder, newPlaceholder);
+        });
+
+        $(html).find("[data-local-value]").each(function () {
+            var changeHtmlValue = $(this).attr("data-local-value");
+            var valueHtml = $(this).html();
+
+            var newValueHtml = $.i18n.map[changeHtmlValue];
+
+            html = html.replace(valueHtml, newValueHtml);
+        });
+
+
+        return html;
+    }
+
 
     function forgetPwdForPassportPassword()
     {
@@ -285,21 +300,37 @@
         $(".zaly_site_register-pwd")[0].style.display = "none";
     }
 
-    $(document).on("click", ".register_button", function () {
+    $(document).on("click", ".register_code_button", function () {
+        var flag = checkRegisterInfo();
+        if(flag == false) {
+            return false;
+        }
+        $(".zaly_site_register-invitecode")[0].style.display = "block";
+        $(".zaly_site_register-pwd")[0].style.display = "none";
+    });
+
+    function checkRegisterInfo()
+    {
         registerLoginName = $(".register_input_loginName").val();
         registernNickname  = $(".register_input_nickname").val();
         registerPassword  = $(".register_input_pwd").val();
         repassword = $(".register_input_repwd").val();
         registerEmail = $(".register_input_email").val();
+        isFocus = false;
 
-        var isFocus = false;
-        if(registerLoginName == "" || registerLoginName == undefined || registerLoginName.length<0) {
+        if(registerLoginName == "" || registerLoginName == undefined || registerLoginName.length<0 ) {
             $("#register_input_loginName").focus();
             $("#register_input_loginName").addClass("outline");
             isFocus = true;
         }
 
-        if(registernNickname == "" || registernNickname == undefined || registernNickname.length<0) {
+        if(!isLoginName(registerLoginName) || registerLoginName.length>16) {
+            $("#register_input_loginName").focus();
+            $("#register_input_loginName").addClass("outline");
+            isFocus = true;
+        }
+
+        if(registernNickname == "" || registernNickname == undefined || registernNickname.length<0 || registernNickname.length>16) {
             $("#register_input_nickname").addClass("outline");
             if(isFocus == false) {
                 $("#register_input_nickname").focus();
@@ -330,6 +361,8 @@
                 isFocus = true;
             }
         }
+
+
         if(isFocus == true) {
             return false;
         }
@@ -342,14 +375,32 @@
             alert($.i18n.map["emailJsTip"]);
             return false;
         }
-        var jsUrl = originDomain+"?action=page.js&loginName="+registerLoginName+"&success_callback=loginNameExist&fail_callback=loginNameNotExist";
+        return true;
+    }
+
+    /**
+     * 数字 字母下划线
+     * @param loginName
+     */
+    function isLoginName(loginName)
+    {
+        var reg = /^[A-Za-z0-9_]+$/;
+        return reg.test(loginName);
+    }
+
+
+    $(document).on("click", ".register_button", function () {
+        checkRegisterInfo();
+        invitationCode = $(".register_input_code").val();
+        var jsUrl = "./index.php?action=page.js&loginName="+registerLoginName+"&success_callback=loginNameExist&fail_callback=loginNameNotExist";
         addJsByDynamic(jsUrl);
     });
+
 
     function handlePassportPasswordReg(results)
     {
         var preSessionId = results.preSessionId;
-        if(refererUrl) {
+        if(refererUrl != undefined && refererUrl.length>1) {
             handleRedirect(preSessionId, 1);
         } else {
             zalyjsLoginSuccess(registerLoginName, preSessionId, true, loginFailed);
@@ -396,8 +447,7 @@
     function handleApiPassportPasswordLogin(results)
     {
         var preSessionId = results.preSessionId;
-
-        if(refererUrl) {
+        if(refererUrl != undefined && refererUrl.length>1) {
             handleRedirect(preSessionId, 0);
         } else {
             zalyjsLoginSuccess(loginName, preSessionId, false, loginFailed);
@@ -495,6 +545,16 @@
         $(".zaly_login_by_pwd")[0].style.display = "block";
         $(".zaly_site_register-pwd")[0].style.display = "none";
         $(".zaly_site_register-repwd")[0].style.display = "none";
+    }
+
+    function returnLoginPage()
+    {
+        window.location.reload();
+    }
+
+    function clearLoginName()
+    {
+        $(".login_input_loginName").val("");
     }
 
 </script>

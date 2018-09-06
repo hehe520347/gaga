@@ -14,6 +14,8 @@ class ZalyMail
     public function __construct()
     {
         $this->mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+        $this->wpf_Logger = new Wpf_Logger();
+
         $mailConfig = ZalyConfig::getConfig("mail");
         try {
             //Server settings
@@ -26,27 +28,27 @@ class ZalyMail
             $this->mail->SMTPSecure =  $mailConfig['SMTPSecure'];                            // Enable TLS encryption, `ssl` also accepted
             $this->mail->Port = $mailConfig['port'];                        // TCP port to connect to
         } catch (Exception $ex) {
-            error_log("error_msg ===".$ex->getMessage());
+            $tag = __CLASS__.'-'.__FUNCTION__;
+            $this->wpf_Logger->error($tag, $ex->getMessage());
         }
     }
 
     public function sendEmail($toEmail, $code, $sendName = "", $subject="重置密码")
     {
         try{
-            $toEmail = "zhang.jun@akaxin.xyz";
-
-            error_log("send flag toEmail ==" . $toEmail);
-            error_log("send flag code ==" . $code);
-
             $this->mail->setFrom($this->mail->Username, $sendName);
             $this->mail->isHTML(true);
             $this->mail->Subject = $subject;
             $this->mail->Body    = $this->getMailHtml($code);
             $this->mail->addAddress($toEmail);
             $sendFlag = $this->mail->send();
-            error_log("send flag ==" . $sendFlag);
+            if($sendFlag) {
+                return true;
+            }
+            throw new Exception("send email failed");
         }catch (Exception $ex) {
-            error_log("error_msg ===".$ex->getMessage());
+            $tag = __CLASS__.'-'.__FUNCTION__;
+            $this->wpf_Logger->error($tag, $ex->getMessage());
         }
     }
 

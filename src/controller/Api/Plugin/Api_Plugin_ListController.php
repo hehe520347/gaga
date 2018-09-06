@@ -33,7 +33,29 @@ class Api_Plugin_ListController extends \BaseController
                 throw new Exception($errorInfo);
             }
 
-            $pluginList = $this->getPluginListFromDB($pluginUsageType);
+            $permissionTypes = [
+                Zaly\Proto\Core\PluginPermissionType::PluginPermissionAll,
+                Zaly\Proto\Core\PluginPermissionType::PluginPermissionGroupMaster,
+            ];
+
+            $siteManagers = $this->ctx->Site_Config->getSiteManagers();
+
+            if (in_array($this->userId, $siteManagers)) {
+                $permissionTypes[] = Zaly\Proto\Core\PluginPermissionType::PluginPermissionAdminOnly;
+            }
+
+            switch ($pluginUsageType) {
+                case Zaly\Proto\Core\PluginUsageType::PluginUsageIndex:
+                case Zaly\Proto\Core\PluginUsageType::PluginUsageU2Message:
+                case Zaly\Proto\Core\PluginUsageType::PluginUsageTmpMessage:
+                case Zaly\Proto\Core\PluginUsageType::PluginUsageGroupMessage:
+                    break;
+                case Zaly\Proto\Core\PluginUsageType::PluginUsageLogin:
+                default:
+                    throw new Exception("mini program usageType error");
+            }
+
+            $pluginList = $this->getPluginListFromDB($pluginUsageType, $permissionTypes);
 
             $response = $this->buildApiPluginListResponse($pluginList);
 
@@ -48,19 +70,22 @@ class Api_Plugin_ListController extends \BaseController
     /**
      * 从数据库获取
      * @param $usageType
+     * @param $permissionTypes
      * @return array
      */
-    private function getPluginListFromDB($usageType)
+    private function getPluginListFromDB($usageType, $permissionTypes)
     {
-        return $this->ctx->SitePluginTable->getPluginList($usageType);
+        return $this->ctx->SitePluginTable->getPluginList($usageType, $permissionTypes);
     }
 
     /**
      * 获取plugin list
+     * @param $sessionId
      * @param $pluginList
+     * @param $pluginPublicKey
      * @return \Zaly\Proto\Site\ApiPluginListResponse
      */
-    private function buildApiPluginListResponse($pluginList)
+    private function buildApiPluginListResponse($sessionId, $pluginList, $pluginPublicKey)
     {
         $response = new \Zaly\Proto\Site\ApiPluginListResponse();
         $list = [];
@@ -70,8 +95,8 @@ class Api_Plugin_ListController extends \BaseController
             $pluginProfile->setId($plugin['pluginId']);
             $pluginProfile->setName($plugin['name']);
             $pluginProfile->setLogo($plugin['logo']);
-            if ($plugin['order']) {
-                $pluginProfile->setOrder($plugin['order']);
+            if ($plugin['sort']) {
+                $pluginProfile->setOrder($plugin['sort']);
             } else {
                 $pluginProfile->setOrder(100);
             }
@@ -81,13 +106,22 @@ class Api_Plugin_ListController extends \BaseController
                 $pluginProfile->setLandingPageWithProxy(true);
             }
 
-            $this->ctx->Wpf_Logger->info("---------------------", "isProxy=" . $plugin['landingPageWithProxy']);
-
             if ($plugin['loadingType']) {
                 $pluginProfile->setLoadingType($plugin['loadingType']);
             } else {
                 $pluginProfile->setLoadingType(\Zaly\Proto\Core\PluginLoadingType::PluginLoadingNewPage);
             }
+
+            $pluginAuthKey = $plugin['authKey'];
+
+            if (empty($pluginAuthKey)) {
+                $pluginAuthKey = $pluginPublicKey;
+            }
+
+            $encryptedSessionId = $this->ctx->ZalyAes->encrypt($sessionId, $pluginAuthKey);
+
+            $pluginProfile->setUserSessionId($encryptedSessionId);
+
             $list[] = $pluginProfile;
         }
         $response->setList($list);

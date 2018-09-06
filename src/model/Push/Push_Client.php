@@ -56,7 +56,7 @@ class Push_Client
                 $pushBody->setRoomId($toId);
                 $pushBody->setRoomName($this->getGroupName($toId));
             }
-            $deviceIds = $this->getPushDeviceIdList($roomType, $toId);
+            $deviceIds = $this->getPushDeviceIdList($roomType, $fromUserId, $toId);
             $pushBody->setToDevicePubkPemIds($deviceIds);
             $pushRequest->setPushBody($pushBody);
 
@@ -101,10 +101,11 @@ class Push_Client
 
     /**
      * @param \Zaly\Proto\Platform\PushRoomType $roomType
+     * @param $fromUserId
      * @param $toId
      * @return array
      */
-    private function getPushDeviceIdList($roomType, $toId)
+    private function getPushDeviceIdList($roomType, $fromUserId, $toId)
     {
         $tag = __CLASS__ . "->" . __FUNCTION__;
         $deviceIdList = [];
@@ -124,11 +125,18 @@ class Push_Client
         } else {
 
             try {//group
-                $groupMemberIds = $this->ctx->SiteGroupUserTable->getGroupAllMembersId($toId);
+                $groupMembers = $this->ctx->SiteGroupUserTable->getGroupAllMembersId($toId);
 
-                if (!empty($groupMemberIds)) {
-                    foreach ($groupMemberIds as $groupMemberId) {
-                        $pushDeviceId = $this->getUserDeviceId($groupMemberId['userId']);
+                if (!empty($groupMembers)) {
+                    foreach ($groupMembers as $groupMember) {
+
+                        $toUserId = $groupMember['userId'];
+
+                        if ($fromUserId == $toUserId) {
+                            continue;
+                        }
+
+                        $pushDeviceId = $this->getUserDeviceId($toUserId);
 
                         if (!empty($pushDeviceId)) {
                             $deviceIdList[] = $pushDeviceId;

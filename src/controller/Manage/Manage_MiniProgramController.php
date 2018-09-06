@@ -11,8 +11,16 @@ class Manage_MiniProgramController extends ManageController
 
     public function doRequest()
     {
-        $this->ctx->Wpf_Logger->info("1111111", 'mange index');
-        echo $this->display("manage_miniProgramIndex");
+        $params = ["lang" => $this->language];
+
+
+        $config = $this->ctx->SiteConfigTable->selectSiteConfig(SiteConfig::SITE_PLUGIN_PLBLIC_KEY);
+
+        $pluginPublicKey = $config[SiteConfig::SITE_PLUGIN_PLBLIC_KEY];
+
+        $params['miniProgramPublicKey'] = $pluginPublicKey;
+
+        echo $this->display("manage_miniProgram_index", $params);
         return;
     }
 

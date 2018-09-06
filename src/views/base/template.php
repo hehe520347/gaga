@@ -5,6 +5,10 @@
     <input type="hidden" data="<?php echo $nickname;?>" class="nickname" />
     <input type="hidden" data="<?php echo $loginName;?>" class="loginName" />
     <input type="hidden" data="<?php echo $avatar;?>" class="self_avatar" />
+    <input type="hidden" data="<?php echo $jumpPage;?>" class="jumpPage" />
+    <input type="hidden" data="<?php echo $jumpRoomId;?>" class="jumpRoomId" />
+    <input type="hidden" data="<?php echo $jumpRoomType;?>" class="jumpRoomType" />
+    <input type="hidden" data="<?php echo $jumpRelation;?>" class="jumpRelation" />
 
     <div id="group-invite-people" class="pop-window pop-window-invite-people">
         <div class="pw-left">
@@ -84,10 +88,10 @@
             <div class="header_tip_font  align-items-center" style="margin-top: 6rem;" data-local-value="addFriendTip">Add Friend</div>
         </div>
 
-        <div class="d-flex flex-row justify-content-center" style="margin-top: 5rem; text-align: center;position: relative" >
+        <div class="d-flex flex-row justify-content-center add-friend-div-img"  >
             <img  class="user-image-for-add" src="../../public/img/msg/default_user.png" style="width: 8rem; height: 8rem;" />
         </div>
-        <div class="d-flex flex-row justify-content-center user-nickname-for-add" style="text-align: center;position: relative;font-size:1.31rem;font-family:PingFangSC-Regular;color:rgba(20,16,48,1);" >
+        <div class="d-flex flex-row justify-content-center user-nickname-for-add">
 
         </div>
 
@@ -139,24 +143,7 @@
     </div>
 
     <div id="share_group" >
-        <div class="" style="width: 19rem;margin: 0 auto;margin-top: 5rem; ">
-            <div style="display: flex;margin-bottom: 3rem;   justify-content: center;">
-                <div class="header" style="width: 5rem;height: 5rem;margin-right: 1rem">
-                    <img class="group_avatar" src="../../public/img/msg/group_default_avatar.png" style="width: 5rem;height: 5rem;">
-                </div>
-                <div class="name" style="margin-top: 1rem;">
-                    <span style="font-size:1.69rem;font-family:PingFangSC-Regular;color:rgba(20,16,48,1);"> </span>
-                    <span style="font-size:1.31rem;font-family:PingFangSC-Regular;color:rgba(153,153,153,1);"> </span>
-                </div>
-            </div>
-            <div id="qrcodeCanvas" style="width:19rem; height: 19rem;">
-            </div>
-        </div>
 
-        <div class="d-flex flex-row justify-content-center width-percent100 margin-top10" style="text-align:center; ">
-            <button type="button" class="btn create_button copy-share-group" style="margin-bottom: 5rem;" data-local-value="copyGroupQrcodeUrlTip">Copy Group Url</button>
-            <button type="button" class="btn create_button save-share-group" style="margin-bottom: 5rem;" data-local-value="saveGroupQrcodeImg">Save Qrcode</button>
-        </div>
     </div>
 </div>
 

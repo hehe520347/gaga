@@ -79,6 +79,7 @@ function circleImg(ctx, img, x, y, r) {
     var d = 2 * r;
     var cx = x + r;
     var cy = y + r;
+
     ctx.arc(cx, cy, r, 0, 2 * Math.PI);
     ctx.clip();
     ctx.drawImage(img, x, y, d, d);
@@ -93,12 +94,15 @@ for (function(a) {
         return "string" == typeof b && (b = {
             text: b
         }),
-
             b = a.extend({},
                 {
                     render: "canvas",
-                    width: 256,
-                    height: 256,
+                    width: b.width,
+                    height: b.height,
+                    canvasWidth:b.canvasWidth,
+                    canvasHeight:b.canvasHeight,
+                    className:b.className,
+                    idName:b.idName,
                     //这里是图片的高度和宽度
                     imgWidth: b.width / 3,
                     imgHeight: b.height / 3,
@@ -111,10 +115,14 @@ for (function(a) {
             c = function() {
                 var c, d, e, f, g, h, i, j, k, a = new QRCode(b.typeNumber, b.correctLevel);
 
-                for (a.addData(utf16to8(b.text)), a.make(), c = document.createElement("canvas"), c.width = b.width, c.height = b.height, d = c.getContext("2d"), b.src && (e = new Image(), e.src = getImgSrc(b.src), e.onload = function() {
-                    console.log("b PHPMailer ==" + b.src);
-                    circleImg(d, e, 70, 70, 30);
-                }), f = b.width / a.getModuleCount(), g = b.height / a.getModuleCount(), h = 0; h < a.getModuleCount(); h++) {
+                for (a.addData(utf16to8(b.text)), a.make(), c = document.createElement("canvas"),
+                         c.id=b.idName,
+                         c.width = b.width,
+                         c.height = b.height,
+                         c.className = b.className,
+                         d = c.getContext("2d"), b.src && (e = new Image(), e.src = getImgSrc(b.src), e.onload = function() {
+                    circleImg(d, e, (b.width-60)/2, (b.width-60)/2, 30);
+                }), f = b.canvasWidth / a.getModuleCount(), g = b.canvasHeight / a.getModuleCount(), h = 0; h < a.getModuleCount(); h++) {
                     for (i = 0; i < a.getModuleCount(); i++) {
                         d.fillStyle = a.isDark(h, i) ? b.foreground: b.background,
                             j = Math.ceil((i + 1) * f) - Math.floor(i * f),
@@ -127,7 +135,7 @@ for (function(a) {
             d = function() {
                 var d, e, f, g, h, i, c = new QRCode(b.typeNumber, b.correctLevel);
                 //这里的utf16to8(b.text)是对Text中的字符串进行转码，让其支持中文
-                for (c.addData(utf16to8(b.text)), c.make(), d = a("<table></table>").css("width", b.width + "px").css("height", b.height + "px").css("border", "0px").css("border-collapse", "collapse").css("background-color", b.background), e = b.width / c.getModuleCount(), f = b.height / c.getModuleCount(), g = 0; g < c.getModuleCount(); g++) {
+                for (c.addData(utf16to8(b.text)), c.make(), d = a("<table></table>").css("width", b.canvasWidth + "px").css("height", b.canvasHeight + "px").css("border", "0px").css("border-collapse", "collapse").css("background-color", b.background), e = b.canvasWidth / c.getModuleCount(), f = b.canvasHeight / c.getModuleCount(), g = 0; g < c.getModuleCount(); g++) {
                     for (h = a("<tr></tr>").css("height", f + "px").appendTo(d), i = 0; i < c.getModuleCount(); i++) {
                         a("<td></td>").css("width", e + "px").css("background-color", c.isDark(g, i) ? b.foreground: b.background).appendTo(h)
                     }

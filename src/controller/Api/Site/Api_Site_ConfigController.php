@@ -34,10 +34,7 @@ class Api_Site_ConfigController extends \BaseController
             $requestHeader = $transportData->getHeader();
             $hostUrl = $requestHeader[TransportDataHeaderKey::HeaderHostUrl];
 
-            $this->ctx->Wpf_Logger->info("api.site.config", "--->url=" . $hostUrl);
-
             $url = parse_url($hostUrl);
-            $this->ctx->Wpf_Logger->info("api.site.config", "--->url=" . json_encode($url));
 
             if (empty($url)) {
                 throw new Exception("api.site.config with no requestUrl in header");
@@ -49,7 +46,6 @@ class Api_Site_ConfigController extends \BaseController
             }
             $siteName = $host;
 
-            $this->ctx->Wpf_Logger->info("api.site.config", "siteAddressUrl =" . json_encode($url));
             $this->ctx->Wpf_Logger->info("api.site.config", "siteName =" . $siteName);
             $this->ctx->Wpf_Logger->info("api.site.config", "siteHost =" . $host);
             $this->ctx->Wpf_Logger->info("api.site.config", "sitePort =" . $port);
@@ -58,9 +54,6 @@ class Api_Site_ConfigController extends \BaseController
                 throw new Exception("request config with no host");
             }
 
-            //init site config when first user login
-//            $this->doSiteConfigInit($siteName, $host, $port);
-
             $randomValue = $request->getRandom();
 
             $sessionId = $this->getSessionId($transportData);
@@ -68,7 +61,6 @@ class Api_Site_ConfigController extends \BaseController
             $isValid = $this->checkSessionValid($sessionId);
 
             $configData = $this->getSiteConfigFromDB();
-            error_log("config data ==".json_encode($configData));
 
             $randomBase64 = $this->buildRandomBase64($randomValue, $configData[SiteConfig::SITE_ID_PRIK_PEM]);
 
@@ -79,7 +71,7 @@ class Api_Site_ConfigController extends \BaseController
             $this->setRpcError($this->defaultErrorCode, "");
             $this->rpcReturn($transportData->getAction(), $response);
         } catch (Exception $ex) {
-            $this->ctx->Wpf_Logger->error($tag, "error_msg=" . $ex);
+            $this->ctx->Wpf_Logger->error($tag, "error=" . $ex);
             $this->setRpcError("error.alert", $ex->getMessage());
             $this->rpcReturn($transportData->getAction(), new $this->classNameForResponse());
         }
@@ -152,11 +144,11 @@ class Api_Site_ConfigController extends \BaseController
 
     private function buildRandomBase64($random, $siteIdPrikBase64)
     {
-        $this->ctx->Wpf_Logger->info("config.random.sign", 'random=' . $random);
+//        $this->ctx->Wpf_Logger->info("config.random.sign", 'random=' . $random);
         try {
             $signatureRandom = $this->ctx->ZalyRsa->sign($random, $siteIdPrikBase64);
             $base64Value = base64_encode($signatureRandom);
-            $this->ctx->Wpf_Logger->info("config.random.base64", 'randomBase64Value=' . $base64Value);
+//            $this->ctx->Wpf_Logger->info("config.random.base64", 'randomBase64Value=' . $base64Value);
             return $base64Value;
         } catch (Exception $e) {
             # TODO 正式代码，这里 throw exception
@@ -185,14 +177,36 @@ class Api_Site_ConfigController extends \BaseController
             $config = new PublicSiteConfig();
             $config->setName($configData[SiteConfig::SITE_NAME]);
             $config->setLogo($configData[SiteConfig::SITE_LOGO]);//        //notice
-            if (isset($configData[SiteConfig::SITE_ADMIN])) {
-                $config->setMasters($configData[SiteConfig::SITE_ADMIN]);
+            if (isset($configData[SiteConfig::SITE_OWNER])) {
+                $config->setMasters($configData[SiteConfig::SITE_OWNER]);
             }
 
-//            $addressForAPi = $data[SiteConfig::SITE_ADDRESS_FOR_API] . "://" . $host . ":" . $port;
-            $addressForAPi = $configData[SiteConfig::SITE_ADDRESS_FOR_API] . "://" . $host . ":2031";
+            $zalyPort = $configData[SiteConfig::SITE_ZALY_PORT];
+            $wsPort = $configData[SiteConfig::SITE_WS_PORT];
+
+            $this->ctx->Wpf_Logger->info("api.site.config", "zalyPort=" . $zalyPort . " wsPort=" . $wsPort);
+
+
+            $addressForAPi = "";
+            $addressForIM = "";
+            if ($zalyPort && $zalyPort > 0 && $zalyPort < 65535) {
+                //support zaly protocol
+                $addressForAPi = "zaly://" . "$host" . ":" . $zalyPort;
+                $addressForIM = "zaly://" . "$host" . ":" . $zalyPort;
+            } else if ($wsPort && $wsPort > 0 && $wsPort < 65535) {
+                //support ws protocol
+                $addressForAPi = "http://" . "$host" . ":" . $port;
+                $addressForIM = "ws://" . "$host" . ":" . "$wsPort";
+            } else {
+                //support http protocol
+                $addressForAPi = "http://" . "$host" . ":" . $port;
+                $addressForIM = "http://" . "$host" . ":" . $port;
+            }
+
+            $this->ctx->Wpf_Logger->info("api.site.config", "addressForAPi=" . $addressForAPi);
+            $this->ctx->Wpf_Logger->info("api.site.config", "addressForIM=" . $addressForIM);
+
             $config->setServerAddressForApi($addressForAPi);
-            $addressForIM = $configData[SiteConfig::SITE_ADDRESS_FOR_IM] . "://" . $host . ":2031";
             $config->setServerAddressForIM($addressForIM);
 
             $config->setLoginPluginId($configData[SiteConfig::SITE_LOGIN_PLUGIN_ID]);
@@ -201,14 +215,14 @@ class Api_Site_ConfigController extends \BaseController
             $config->setEnableTmpChat($configData[SiteConfig::SITE_ENABLE_TMP_CHAT]);
             $config->setEnableInvitationCode($configData[SiteConfig::SITE_ENABLE_INVITATION_CODE]);
             $config->setEnableRealName($configData[SiteConfig::SITE_ENABLE_REAL_NAME]);
-            $config->setEnableWidgetWeb($configData[SiteConfig::SITE_ENABLE_WIDGET_WEB]);
+            $config->setEnableWidgetWeb($configData[SiteConfig::SITE_ENABLE_WEB_WIDGET]);
             $config->setSiteIdPubkBase64($configData[SiteConfig::SITE_ID_PUBK_PEM]);
 
             $response->setConfig($config);
 
-            $this->ctx->Wpf_Logger->info("api.site.config", 'responseJson=' . $response->serializeToString());
+//            $this->ctx->Wpf_Logger->info("api.site.config", 'responseJson=' . $response->serializeToString());
         } catch (Exception $e) {
-            $this->ctx->Wpf_Logger->info("api.site.config", $e);
+            $this->ctx->Wpf_Logger->error("api.site.config", $e);
             throw new Exception('get site config profile error');
         }
 
@@ -221,7 +235,7 @@ class Api_Site_ConfigController extends \BaseController
             $loginPluginProfile->setLandingPageUrl($pluginProfile['landingPageUrl']);
             $loginPluginProfile->setLandingPageWithProxy($pluginProfile['landingPageWithProxy']);
             $loginPluginProfile->setLoadingType($pluginProfile['loadingType']);
-            $loginPluginProfile->setOrder($pluginProfile['order']);
+            $loginPluginProfile->setOrder($pluginProfile['sort']);
             $loginPluginProfile->setUsageTypes([$pluginProfile['usageType']]);
             $loginPluginProfile->setPermissionType($pluginProfile['permissionType']);
             $response->setLoginPluginProfile($loginPluginProfile);

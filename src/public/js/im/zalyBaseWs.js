@@ -17,6 +17,7 @@ var host = window.location.host;
 var pathname = window.location.pathname;
 originDomain = protocol+"//"+host+pathname;
 
+
 function ZalyIm(params)
 {
     var config = params.config;

@@ -1,35 +1,8 @@
 
-MessageType = {
-    MessageInvalid : "MessageInvalid",
-    MessageNotice  : "MessageNotice",
-    MessageText    : "MessageText",
-    MessageImage   : "MessageImage",
-    MessageAudio   : "MessageAudio",
-    MessageWeb     : "MessageWeb",
-    MessageWebNotice : "MessageWebNotice",
-
-    // event message start
-    MessageEventFriendRequest : "MessageEventFriendRequest",
-    MessageEventStatus  : "MessageEventStatus",   // -> StatusMessage
-    MessageEventSyncEnd :"MessageEventSyncEnd",
-
-};
 
 msgImageSize = "";
-MessageTypeNum = {
-    MessageInvalid : 0,
-    MessageNotice  : "1",
-    MessageText    : "2",
-    MessageImage   : "3",
-    MessageAudio   : "4",
-    MessageWeb     : "5",
-    MessageWebNotice : "6",
 
-    // event message start
-    MessageEventFriendRequest : "MessageEventFriendRequest",
-    MessageEventStatus  : "MessageEventStatus",   // -> StatusMessage
-    MessageEventSyncEnd :"MessageEventSyncEn",
-};
+isSyncingMsg = false;
 
 function getRoomList()
 {
@@ -63,41 +36,46 @@ function getRoomList()
     msgBoxScrollToBottom();
 }
 
+
 function handleRoomListFromLocalStorage(roomMsg)
 {
-    var roomListStr = localStorage.getItem(roomListKey);
-    var roomList;
-    if(roomListStr) {
-        roomList = JSON.parse(roomListStr);
-    } else {
-        roomList = new Array();
-    }
-    var isUpdate =false;
+    try{
+        var roomListStr = localStorage.getItem(roomListKey);
+        var roomList;
+        if(roomListStr) {
+            roomList = JSON.parse(roomListStr);
+        } else {
+            roomList = new Array();
+        }
+        var isUpdate =false;
 
-    if(roomMsg != undefined) {
-        var length = roomList.length;
-        var i;
-        for(i =0; i<length;  i++) {
-            var msg = roomList[i];
-            if(msg!=null&& msg!= false && msg.hasOwnProperty("chatSessionId") && msg.chatSessionId == roomMsg.chatSessionId) {
-                if(msg.timeServer < roomMsg.timeServer) {
-                    if(roomMsg.hasOwnProperty("text") && roomMsg["text"].body.length < 1){
-                        msg.timeServer = roomMsg.timeServer;
-                    } else {
-                        msg = roomMsg;
+        if(roomMsg != undefined) {
+            var length = roomList.length;
+            var i;
+            for(i =0; i<length;  i++) {
+                var msg = roomList[i];
+                if(msg!=null&& msg!= false && msg.hasOwnProperty("chatSessionId") && msg.chatSessionId == roomMsg.chatSessionId) {
+                    if(msg.timeServer < roomMsg.timeServer) {
+                        if(roomMsg.hasOwnProperty("text") && roomMsg["text"].body.length < 1){
+                            msg.timeServer = roomMsg.timeServer;
+                        } else {
+                            msg = roomMsg;
+                        }
+                        roomList[i] = msg;
                     }
-                    roomList[i] = msg;
+                    isUpdate = true;
                 }
-                isUpdate = true;
+            }
+            if(!isUpdate) {
+                roomList.push(roomMsg);
             }
         }
-        if(!isUpdate) {
-            roomList.push(roomMsg);
-        }
+        roomList.sort(compare);
+        localStorage.setItem(roomListKey, JSON.stringify(roomList));
+        return roomList;
+    }catch (error) {
+        storageError(error);
     }
-    roomList.sort(compare);
-    localStorage.setItem(roomListKey, JSON.stringify(roomList));
-    return roomList;
 }
 
 function removeRoomFromRoomList(chatSessionId)
@@ -130,7 +108,7 @@ function appendOrInsertRoomList(msg, isInsert)
         return ;
     }
     var unReadNum = localStorage.getItem(roomMsgUnReadNum + msg.chatSessionId) ? localStorage.getItem(roomMsgUnReadNum + msg.chatSessionId): 0;
-
+    unReadNum  = unReadNum > 99 ? "99+" : unReadNum;
     var name   =  msg.roomType == GROUP_MSG ? msg.name : msg.nickname;
     var msgType = msg.msgType != undefined ? msg.msgType : msg.type;
     var msgContent;
@@ -147,6 +125,10 @@ function appendOrInsertRoomList(msg, isInsert)
             break;
         case MessageType.MessageNotice:
             msgContent = msg["notice"].body;
+            msgContent = msgContent && msgContent.length > 10 ? msgContent.substr(0,10)+"..." : msgContent;
+            break;
+        case MessageType.MessageWeb:
+            msgContent = "[" + msg["web"].title + "]";
             msgContent = msgContent && msgContent.length > 10 ? msgContent.substr(0,10)+"..." : msgContent;
             break;
     }
@@ -180,7 +162,7 @@ function appendOrInsertRoomList(msg, isInsert)
             }
 
             var subChildrens = $(childrens[1])[0].children;
-            $(subChildrens[1]).html(msgTime)
+            $(subChildrens[1]).html(msgTime);
             sortRoomList($(nodes));
         }
         if(msg.chatSessionId == localStorage.getItem(chatSessionIdKey)) {
@@ -265,24 +247,36 @@ function handleMsgInfo(msg)
 
 function uniqueMsgAndCheckMsgId(msgList, msgId, roomChatSessionKey)
 {
-    var hash = {};
-    var repeatMsgId = {};
-    msgList = msgList.reduce(function(item, next) {
-        hash[next.msgId] ? repeatMsgId[msgId] = true : hash[next.msgId] = true && item.push(next);
-        return item
-    }, []);
-    localStorage.setItem(roomChatSessionKey, JSON.stringify(msgList));
+    try{
+        var hash = {};
+        var repeatMsgId = {};
+        msgList = msgList.reduce(function(item, next) {
+            hash[next.msgId] ? repeatMsgId[msgId] = true : hash[next.msgId] = true && item.push(next);
+            return item
+        }, []);
+        localStorage.setItem(roomChatSessionKey, JSON.stringify(msgList));
 
-    return repeatMsgId[msgId] ? false : true;
+        return repeatMsgId[msgId] ? false : true;
+    }catch (error) {
+        handleSetItemError(error);
+    }
 }
-
+function handleSetItemError(error)
+{
+    if( e.name.toUpperCase().indexOf('QUOTA') >= 0) {
+        console.log("error ==" + error.message);
+    }
+}
 enableWebsocketGw = localStorage.getItem(websocketGW);
 
-enableWebsocketGw = "false";
-
 if(enableWebsocketGw == "false") {
-    ///10秒 sync
-    setInterval(syncMsgForRoom, 1000);
+    ///1秒 sync
+   setInterval(function (args) {
+       enableWebsocketGw = localStorage.getItem(websocketGW);
+       if(enableWebsocketGw == "false")  {
+           syncMsgForRoom();
+       }
+   }, 1000);
 }
 
 if(enableWebsocketGw == "true") {
@@ -304,6 +298,10 @@ function handleAuth()
 
 function syncMsgForRoom()
 {
+    if(isSyncingMsg == true) {
+        return ;
+    }
+    isSyncingMsg = true;
     var action = "im.cts.sync";
 
     var reqData = {
@@ -315,44 +313,49 @@ function syncMsgForRoom()
 
 function handleSyncMsgForRoom(results)
 {
-    var list = results.list;
-    if(list){
-        var length = list.length;
-        ////从小到大排序
-        list.sort(compare);
-        var groupUpdatePointer = {};
-        var u2UpdatePointer = 0;
-        var i;
-        var isNeewUpdatePointer = false;
-        for(i=0; i<length; i++) {
-            var msg = list[i];
-            if(msg.hasOwnProperty("toGroupId") && msg.toGroupId.length>0) {
-                isNeewUpdatePointer = true
-                var groupId = msg.toGroupId;
-                if(groupUpdatePointer.hasOwnProperty(groupId)) {
-                    var pointer = groupUpdatePointer[groupId];
-                    if(Number(pointer) < Number(msg.pointer)) {
+    try{
+        var list = results.list;
+        if(list){
+            var length = list.length;
+            ////从小到大排序
+            list.sort(compare);
+            var groupUpdatePointer = {};
+            var u2UpdatePointer = 0;
+            var i;
+            var isNeewUpdatePointer = false;
+            for(i=0; i<length; i++) {
+                var msg = list[i];
+                if(msg.hasOwnProperty("toGroupId") && msg.toGroupId.length>0) {
+                    isNeewUpdatePointer = true;
+                    var groupId = msg.toGroupId;
+                    if(groupUpdatePointer.hasOwnProperty(groupId)) {
+                        var pointer = groupUpdatePointer[groupId];
+                        if(Number(pointer) < Number(msg.pointer)) {
+                            groupUpdatePointer[groupId] = msg.pointer;
+                        }
+                    } else {
                         groupUpdatePointer[groupId] = msg.pointer;
                     }
                 } else {
-                    groupUpdatePointer[groupId] = msg.pointer;
+                    if(msg.pointer != undefined) {
+                        isNeewUpdatePointer = true
+                        u2UpdatePointer = msg.pointer;
+                    }
                 }
-            } else {
-                if(msg.pointer != undefined) {
-                    isNeewUpdatePointer = true
-                    u2UpdatePointer = msg.pointer;
-                }
+                handleSyncMsg(msg);
             }
-            handleSyncMsg(msg);
-        }
-        if(isNeewUpdatePointer == true) {
-            var updateMsgPointerData = {
-                u2Pointer:u2UpdatePointer,
-                groupsPointer : groupUpdatePointer,
-            };
+            isSyncingMsg = false;
 
-            updateMsgPointer(updateMsgPointerData);
+            if(isNeewUpdatePointer == true) {
+                var updateMsgPointerData = {
+                    u2Pointer:u2UpdatePointer,
+                    groupsPointer : groupUpdatePointer,
+                };
+                updateMsgPointer(updateMsgPointerData);
+            }
         }
+    }catch (error) {
+        isSyncingMsg = false;
     }
 }
 
@@ -388,6 +391,23 @@ function handleSyncMsg(msg)
     appendOrInsertRoomList(msg, true);
 }
 
+function handleMsgStatusResult(msgId, msgStatus)
+{
+    var msgIdInChatSession = msgIdInChatSessionKey + msgId;
+    var chatSessionId = sessionStorage.getItem(msgIdInChatSession);
+
+    if(msgStatus == MessageStatus.MessageStatusFailed) {
+        $(".msg_status_failed_"+msgId)[0].style.display = "flex";
+        $(".msg_status_loading_"+msgId)[0].style.display = "none";
+        $(".msg_status_loading_"+msgId).attr("is-display", "none");
+        updateMsgStatus(msgId, chatSessionId, MessageStatus.MessageStatusFailed);
+    } else if(msgStatus == MessageStatus.MessageStatusServer) {
+        $(".msg_status_loading_"+msgId)[0].style.display = "none";
+        $(".msg_status_loading_"+msgId).attr("is-display", "none");
+    }
+    sessionStorage.removeItem(msgIdInChatSession);
+}
+
 function setRoomMsgUnreadNum(chatSessionId)
 {
     var mute = localStorage.getItem(msgMuteKey+chatSessionId);
@@ -414,6 +434,7 @@ function getRoomMsgUnreadNum(chatSessionId)
 {
     var unreadKey = roomMsgUnReadNum + chatSessionId;
     var unreadNum = !localStorage.getItem(unreadKey) ? 0 : Number(localStorage.getItem(unreadKey));
+    unreadNum = unreadNum > 99 ? "99+" : unreadNum;
     return unreadNum;
 }
 
@@ -427,43 +448,59 @@ function handleMsgForMsgRoom(chatSessionId, pushMsg)
 {
     var roomChatSessionKey = roomKey + chatSessionId;
     var msgListJsonStr = localStorage.getItem(roomChatSessionKey);
+    var isFlag = moreThanMaxStorageSore(roomChatSessionKey);
+    if(isFlag) {
+        msgListJsonStr = false;
+    }
     var msgList;
-    if(!msgListJsonStr) {
-        msgList = new Array();
-    } else {
-        msgList = JSON.parse(msgListJsonStr);
-    }
+    try{
+        if(!msgListJsonStr) {
+            msgList = new Array();
+        } else {
+            msgList = JSON.parse(msgListJsonStr);
+        }
 
-    if(msgList.length>300) {
-        msgList.shift();
-    }
+        while(msgList.length>=300) {
+            msgList.shift();
+        }
 
-    if(pushMsg != undefined) {
-        msgList.push(pushMsg);
-        var isNewMsg = uniqueMsgAndCheckMsgId(msgList, pushMsg.msgId, roomChatSessionKey);
+        if(pushMsg != undefined) {
+            msgList.push(pushMsg);
+            var isNewMsg = uniqueMsgAndCheckMsgId(msgList, pushMsg.msgId, roomChatSessionKey);
 
-        return isNewMsg;
+            return isNewMsg;
+        }
+        msgList.sort(compare);
+        return msgList;
+    }catch (error){
+        if(error.name == "QuotaExceededError" || error.name == "ReferenceError") {
+            msgList = new Array();
+            if(pushMsg != undefined) {
+                msgList.push(pushMsg);
+                var isNewMsg = uniqueMsgAndCheckMsgId(msgList, pushMsg.msgId, roomChatSessionKey);
+                return isNewMsg;
+            }
+            msgList.sort(compare);
+            return msgList;
+        }
     }
-    msgList.sort(compare);
-    return msgList;
 }
 
-function handleMsgStatusResult(msgId, msgStatus)
+function moreThanMaxStorageSore(item)
 {
-    var msgIdInChatSession = msgIdInChatSessionKey + msgId;
-    var chatSessionId = sessionStorage.getItem(msgIdInChatSession);
-
-    if(msgStatus == MessageStatus.MessageStatusFailed) {
-        $(".msg_status_failed_"+msgId)[0].style.display = "flex";
-        $(".msg_status_loading_"+msgId)[0].style.display = "none";
-        $(".msg_status_loading_"+msgId).attr("is-display", "none");
-        updateMsgStatus(msgId, chatSessionId, MessageStatus.MessageStatusFailed);
-    } else if(msgStatus == MessageStatus.MessageStatusServer) {
-        $(".msg_status_loading_"+msgId)[0].style.display = "none";
-        $(".msg_status_loading_"+msgId).attr("is-display", "none");
+    var sizeStore = 0;
+    var itemData=  window.localStorage.getItem(item);
+    if(itemData == false || itemData == undefined || itemData == "") {
+        return false;
     }
-    sessionStorage.removeItem(msgIdInChatSession);
+    sizeStore += itemData.length;
+    sizeStore = (sizeStore / 1024 / 1024).toFixed(2)
+    if(sizeStore>MaxStorageStore) {
+        return true;
+    }
+    return false;
 }
+
 
 function  updateMsgStatus(msgId, chatSessionId, msgStatus)
 {
@@ -526,6 +563,8 @@ function clearRoomUnreadMsgNum(chatSessionId)
     var unReadNum = localStorage.getItem(unreadKey) ?  Number(localStorage.getItem(unreadKey)) : 0 ;
     var roomListUnreadNum = localStorage.getItem(roomListMsgUnReadNum);
     roomListUnreadNum =  (roomListUnreadNum-unReadNum) >0 ? (roomListUnreadNum-unReadNum) : 0;
+    roomListUnreadNum =  (roomListUnreadNum-unReadNum) >99 ? "99+": roomListUnreadNum;
+
     localStorage.setItem(roomListMsgUnReadNum,roomListUnreadNum);
     localStorage.removeItem(unreadKey);
 
@@ -600,6 +639,7 @@ function sendMsg( chatSessionId, chatSessionType, msgContent, msgType)
             displayContent = msgContent;
             break;
         case MessageType.MessageImage:
+            console.log("MessageType.MessageImage msgImageSize==" + JSON.stringify(msgImageSize));
             message['type'] = MessageType.MessageImage;
             message['image'] = {url:msgContent, width:msgImageSize.width, height:msgImageSize.height};
             displayContent = "[图片消息]";
@@ -710,7 +750,7 @@ function appendMsgHtml(msg)
                 html =  msg['notice'].code;
                 break;
             case MessageType.MessageWeb :
-                var hrefUrl = getWebMsgHref(msg.msgId);
+                var hrefUrl = getWebMsgHref(msg.msgId, msg.roomType);
                 html = template("tpl-send-msg-web", {
                     roomType: msg.roomType,
                     nickname: msg.nickname,
@@ -761,7 +801,7 @@ function appendMsgHtml(msg)
                 break;
             case MessageType.MessageWebNotice :
                 // html =  msg['webNotice'].code;
-                var hrefUrl = getWebMsgHref(msg.msgId);
+                var hrefUrl = getWebMsgHref(msg.msgId, msg.roomType);
                 html = template("tpl-receive-msg-web-notice", {
                     roomType: msg.roomType == GROUP_MSG ? 1 : 0,
                     nickname: msg.nickname,
@@ -775,7 +815,7 @@ function appendMsgHtml(msg)
                 break;
             case MessageType.MessageWeb :
                 // html = "请前往客户端查看web消息";
-                var hrefUrl = getWebMsgHref(msg.msgId);
+                var hrefUrl = getWebMsgHref(msg.msgId, msg.roomType);
                 html = template("tpl-receive-msg-web", {
                     roomType: msg.roomType,
                     nickname: msg.nickname,
@@ -845,7 +885,7 @@ function getMsgSizeForDiv(msg)
 }
 function getWebMsgHref(msgId, msgRoomType)
 {
-    var url = "./index.php?action=http.file.downloadWebMsg&msgId="+msgId+"&isGroupMsg="+(msgRoomType==GROUP_MSG ? 0 : 1);
+    var url = "./index.php?action=http.file.downloadWebMsg&msgId="+msgId+"&isGroupMessage="+(msgRoomType==GROUP_MSG ? 1 : 0);
     return url;
 }
 
@@ -871,7 +911,7 @@ function uploadMsgImgFromInput(obj) {
             formData.append("fileType", FileType.FileImage);
             formData.append("isMessageAttachment",true);
             var src = window.URL.createObjectURL(obj.files.item(0));
-
+            getMsgImageSize(src);
             uploadMsgImgToServer(formData, src, uploadImgForMsg);
 
             return window.URL.createObjectURL(obj.files.item(0));
@@ -903,6 +943,7 @@ function getMsgImageSize(src)
             width:image.width,
             height:image.height
         }
+        console.log("msgImageSize==" + JSON.stringify(msgImageSize));
     };
 }
 
@@ -1001,6 +1042,7 @@ function uploadMsgImgToServer(formData, src, type)
                     // alert("上传成功！");
                     var imgKey = sendMsgImgUrlKey+fileName;
                     localStorage.setItem(imgKey, src);
+
                     sendMsg(chatSessionId, chatSessionType, fileName, MessageType.MessageImage);
                     $("#msgImage").html("");
                     $("#msgImage")[0].style.display = "none";
@@ -1026,8 +1068,11 @@ function uploadUserImgFromInput(obj) {
             formData.append("fileType", FileType.FileImage);
             formData.append("isMessageAttachment", false);
 
-            uploadMsgImgToServer(formData, src, uploadImgForSelfAvatar);
             var src = window.URL.createObjectURL(obj.files.item(0));
+            getMsgImageSize(src);
+
+            uploadMsgImgToServer(formData, src, uploadImgForSelfAvatar);
+
             $(".user-image-upload").attr("src", src);
         }
         return obj.value;
@@ -1045,43 +1090,4 @@ function updateUserAvatar(fileName)
     updateUserInfo(values);
 }
 
-$(document).on("click", ".nickname_for_self", function () {
-
-});
-
-function updateSelfNickName(event)
-{
-    var isIE = (document.all) ? true : false;
-    var key;
-    if(isIE) {
-        key = event.keyCode;
-    } else {
-        key = event.which;
-    }
-    if(key != 13) {
-        return;
-    }
-    var nickname = $(".nickname").val();
-    var values = new Array();
-    var value = {
-        type : "ApiUserUpdateNickname",
-        nickname : nickname,
-    };
-    values.push(value);
-    updateUserInfo(values);
-}
-
-function updateUserInfo(values)
-{
-    var reqData = {
-        values : values
-    };
-    var action = "api.user.update";
-    handleClientSendRequest(action, reqData, handleUpdateUserInfo);
-}
-
-function handleUpdateUserInfo(results)
-{
-    window.location.reload();
-}
 

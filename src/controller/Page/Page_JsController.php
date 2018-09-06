@@ -18,18 +18,32 @@ class Page_JsController extends  HttpBaseController
     public function index()
     {
         header('Access-Control-Allow-Origin: *');
-
         $loginName = isset($_GET['loginName']) ? $_GET['loginName'] : "";
+
         if(!$loginName){
             exit;
         }
         $userInfo = $this->ctx->SiteUserTable->getUserByLoginName($loginName);
         $callBackSuccess = isset($_GET['success_callback']) ? $_GET['success_callback'] : "";
         $callBackFail    = isset($_GET['fail_callback']) ? $_GET['fail_callback'] : "";
-        if($userInfo) {
-            echo "$callBackSuccess()";
+        $isReqType = isset($_GET['isReqType']) ? $_GET['isReqType'] : "";
+
+        if($isReqType == "proxy") {
+            if($userInfo) {
+                error_log("page-js isReqType ==success");
+                echo "success";
+            } else {
+                error_log("page-js isReqType ==fail");
+
+                echo "fail";
+            }
         } else {
-            echo "$callBackFail()";
+            if($userInfo) {
+                echo "$callBackSuccess()";
+            } else {
+                echo "$callBackFail()";
+            }
         }
+
     }
 }

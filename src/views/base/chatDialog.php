@@ -135,7 +135,7 @@
         </div>
 
         <div style="position: relative">
-            <div class="group-profile-desc" style="position:absolute; visibility:hidden;">
+            <div class="group-profile-desc">
                 <div class="group-desc">
                     <div class="group-desc-title" style="position: relative" data-local-value="groupProfileDescTip">
                         Group Introduce
@@ -145,15 +145,17 @@
                     <div class="group-desc-body">
                         <textarea class="group-introduce"></textarea>
                     </div>
-<!--                    <div class="action-row mark-down-group" style="margin-left: 0rem;">-->
-<!--                        <div class="action-title" style="margin-left: 0rem;">markDown</div>-->
-<!--                        <div class="action-btn "style="padding-right: 2rem;">-->
-<!--                            <img src="../../public/img/msg/icon_switch_off.png" class="mark_down" />-->
-<!--                        </div>-->
-<!--                    </div>-->
                 </div>
 
                 <div class="action-group">
+                    <div class="action-row action-row-disclosure edit_group_name">
+                        <div class="action-title" data-local-value="groupProfileNameTip">Group Name</div>
+                        <div class="action-btn groupName" style="width: auto;">
+
+                        </div>
+                        <img src="../../public/img/edit.png" style="width: 1rem; height:1rem; margin-right: 2rem;margin-top: 2rem;"/>
+                    </div>
+
                     <div class="action-row action-row-disclosure remove_member">
                         <div class="action-title" data-local-value="removeGroupMemberTip">Remove Member</div>
                         <div class="action-btn">
@@ -179,9 +181,9 @@
                         </div>
                     </div>
 
-<!--                    <div class="action-row share-group" >-->
-<!--                        <div class="action-title" data-local-value="shareGroupTip">Share Group Qrcode</div>-->
-<!--                    </div>-->
+                    <div class="action-row share-group" >
+                        <div class="action-title" data-local-value="shareGroupTip">Share Group Qrcode</div>
+                    </div>
 
                     <div class="action-row quit-group" style="display: none;border-bottom: 1px solid rgba(223,223,223,1);" >
                         <div class="action-title" data-local-value="quitGroupTip">Quit Group</div>
@@ -225,9 +227,8 @@
                     <div class="action-row add-friend add-friend-btn">
                         <div class="action-title"  data-local-value="addFriendTip">Add Friend</div>
                     </div>
+                </div>
             </div>
-            </div>
-
         </div>
     </div>
 </div>

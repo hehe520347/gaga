@@ -31,7 +31,7 @@ class Api_Group_MembersController extends Api_Group_BaseController
             $groupId  = $request->getGroupId();
 
             if (!$groupId) {
-                $errorCode = $this->zalyError->errorGroupMemberGroupId;
+                $errorCode = $this->zalyError->errorGroupIdExists;
                 $errorInfo = $this->zalyError->getErrorInfo($errorCode);
                 $this->setRpcError($errorCode, $errorInfo);
                 throw new Exception($errorInfo);

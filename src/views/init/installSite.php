@@ -11,59 +11,77 @@
 
 <div class="zaly_container" >
     <div class="zaly_login zaly_login_by_phone">
-        <div class="" style="height:8rem;background-color: #6B52FF; text-align: center;">
-
-            <div style="font-size:2.25rem;line-height: 8rem;font-family:PingFangSC-Regular;font-weight:500;color: #FFFFFF;">
+        <div class="initDiv " style="margin-top:2rem;" >
+            <div class="initHeader" style="">
                 检测站点信息
             </div>
-        </div>
-
-        <div class="initDiv " style="margin-top:2rem;" >
-
-            <div class=" d-flex flex-row justify-content-between margin-top3 ext_open_ssl" isLoad="<?php echo $isLoadOpenssl;?>" >
-                1. PHP版本大于7.0.0 （后续版本会支持5.x.x）
-                <?php if($isPhpVersionValid){ echo " <img src='../../public/img/msg/member_select.png' style='margin-left: 3rem;width: 1.5rem;height: 1.5rem;'/>
-"; } else { echo "<img src='../../public/img/msg/btn-x.png' style='margin-left: 3rem;width: 1.5rem;height: 1.5rem;' />" ;}?>
-
+            <div class="init_check_info margin-top5 " isLoad="<?php echo $isLoadOpenssl;?>">
+                <div  class="init_check">
+                    PHP版本大于5.6
+                </div>
+                <div class="init_check_result">
+                    <?php if($isPhpVersionValid){ echo " <img src='../../public/img/msg/member_select.png' />
+"; } else { echo "<img src='../../public/img/msg/btn-x.png'  />" ;}?>
+                </div>
             </div>
 
-            <div class=" d-flex flex-row justify-content-between margin-top3 ext_open_ssl" isLoad="<?php echo $isLoadOpenssl;?>" >
-                2. 有效支持OpenSSL（某些Windows版本PHP集成的Openssl有Bug）
-                   <?php if($isLoadOpenssl==1){ echo " <img src='../../public/img/msg/member_select.png' style='margin-left: 3rem;width: 1.5rem;height: 1.5rem;'/>
-"; } else { echo "<img src='../../public/img/msg/btn-x.png' style='margin-left: 3rem;width: 1.5rem;height: 1.5rem;' />" ;}?>
-
+            <div class="init_check_info  ext_open_ssl" isLoad="<?php echo $isLoadOpenssl;?>" >
+                <div  class="init_check">
+                    是否支持OpenSSL
+                </div>
+                <div class="init_check_result" >
+                 <?php if($isLoadOpenssl==1){ echo " <img src='../../public/img/msg/member_select.png'/>
+"; } else { echo "<img src='../../public/img/msg/btn-x.png' />" ;}?>
+                </div>
             </div>
 
-            <div class=" d-flex flex-row justify-content-left margin-top3 ext_pdo_sqlite" isLoad="<?php echo $isLoadPDOSqlite;?>" >
-                3. 是否安装PDO_Sqlite
-                <?php if($isLoadPDOSqlite==1){ echo " <img src='../../public/img/msg/member_select.png' style='margin-left: 3rem;width: 1.5rem;height: 1.5rem;'/>
-"; } else { echo "<img src='../../public/img/msg/btn-x.png' style='margin-left: 3rem;width: 1.5rem;height: 1.5rem;' />" ;}?>
-
+            <div class=" init_check_info justify-content-left  ext_pdo_sqlite" isLoad="<?php echo $isLoadPDOSqlite;?>" >
+                <div  class="init_check">
+                    是否安装PDO_Sqlite
+                </div>
+                <div class="init_check_result">
+                <?php if($isLoadPDOSqlite==1){ echo " <img src='../../public/img/msg/member_select.png' />
+"; } else { echo "<img src='../../public/img/msg/btn-x.png' />" ;}?>
+                </div>
             </div>
 
-            <div class=" d-flex flex-row justify-content-left margin-top3 ext_curl"  isLoad="<?php echo $isLoadCurl;?>" >
-                4. 是否安装Curl
-                <?php if($isLoadCurl==1){ echo " <img src='../../public/img/msg/member_select.png' style='margin-left: 3rem;width: 1.5rem;height: 1.5rem;'/>
-"; } else { echo "<img src='../../public/img/msg/btn-x.png' style='margin-left: 3rem;width: 1.5rem;height: 1.5rem;' />" ;}?>
+            <div class="init_check_info justify-content-left ext_curl"  isLoad="<?php echo $isLoadCurl;?>" >
+                <div  class="init_check">
+                    是否安装Curl
+                </div>
+                <div class="init_check_result">
 
+                <?php if($isLoadCurl==1){ echo " <img src='../../public/img/msg/member_select.png'/>
+"; } else { echo "<img src='../../public/img/msg/btn-x.png'  />" ;}?>
+                </div>
             </div>
 
-            <div class=" d-flex flex-row justify-content-left margin-top3 ext_is_write"  isLoad="<?php echo $isWritePermission;?>" >
-                5. 当前目录（config.php、attachment）目录写权限
-                <?php if($isWritePermission==1){ echo " <img src='../../public/img/msg/member_select.png' style='margin-left: 3rem;width: 1.5rem;height: 1.5rem;'/>
-"; } else { echo "<img src='../../public/img/msg/btn-x.png' style='margin-left: 3rem;width: 1.5rem;height: 1.5rem;' />" ;}?>
+            <div class="init_check_info justify-content-left  ext_is_write"  isLoad="<?php echo $isWritePermission;?>" >
+                <div  class="init_check">
+                    当前目录写权限
+                </div>
+                <div class="init_check_result">
 
+                <?php if($isWritePermission==1){ echo " <img src='../../public/img/msg/member_select.png'/>
+"; } else { echo "<img src='../../public/img/msg/btn-x.png'  />" ;}?>
+                </div>
             </div>
 
-            <div class="d-flex flex-row input_div justify-content-between margin-top3" >
-                6. 请选择登录方式：<select id="verifyPluginId">
-                    <option pluginId="105">本地账户密码校验</option>
-                    <option pluginId="100">平台校验</option>
-                </select>
+            <div class="init_check_info input_div justify-content-between " >
+                <div  class="init_check">
+
+                请选择登录方式：
+                </div>
+                <div class="init_check_result choose_login_type">
+                    <select id="verifyPluginId" >
+                        <option class="selectOption" pluginId="105">本地账户密码校验</option>
+                        <option  class="selectOption"  pluginId="100">平台校验</option>
+                    </select>
+                </div>
             </div>
 
 
-            <div class="d-flex flex-row justify-content-center ">
+            <div class="d-flex flex-row justify-content-center " style="text-align: center;margin-bottom: 7rem;">
                 <button type="button" class="btn login_button" ><span class="span_btn_tip">初始化数据</span></button>
             </div>
         </div>

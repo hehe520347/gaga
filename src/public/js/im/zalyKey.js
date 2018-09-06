@@ -9,6 +9,37 @@ HeaderAllowCache = "_7";
 HeaderUserClientLang = "_8";
 HeaderApplicationVersion = "_10";
 
+MessageType = {
+    MessageInvalid : "MessageInvalid",
+    MessageNotice  : "MessageNotice",
+    MessageText    : "MessageText",
+    MessageImage   : "MessageImage",
+    MessageAudio   : "MessageAudio",
+    MessageWeb     : "MessageWeb",
+    MessageWebNotice : "MessageWebNotice",
+
+    // event message start
+    MessageEventFriendRequest : "MessageEventFriendRequest",
+    MessageEventStatus  : "MessageEventStatus",   // -> StatusMessage
+    MessageEventSyncEnd :"MessageEventSyncEnd",
+
+};
+
+MessageTypeNum = {
+    MessageInvalid : 0,
+    MessageNotice  : "1",
+    MessageText    : "2",
+    MessageImage   : "3",
+    MessageAudio   : "4",
+    MessageWeb     : "5",
+    MessageWebNotice : "6",
+
+    // event message start
+    MessageEventFriendRequest : "MessageEventFriendRequest",
+    MessageEventStatus  : "MessageEventStatus",   // -> StatusMessage
+    MessageEventSyncEnd :"MessageEventSyncEn",
+};
+
 FriendRelation = {
     FriendRelationInvalid : "FriendRelationInvalid",
     FriendRelationFollow  : "FriendRelationFollow",
@@ -119,6 +150,7 @@ roomKey  = "room_";
 roomMsgUnReadNum = "room_msg_unread_num_";
 roomListMsgUnReadNum = "room_list_msg_unread_num";
 roomListKey = "room_list";
+MaxStorageStore=3;
 
 DISPLAY_CHAT = "chat";
 DISPLAY_APPLY_FRIEND_LIST = "apply_friend_list";
@@ -129,8 +161,7 @@ defaultCountKey = 200;
 
 chatSessionIdKey = "chat_session_id";
 localPotiner    = "group_pointer_";
-userProfileKey  = "user_profile_";
-groupProfileKey = "group_profile_";
+profileKey = "profile_";
 friendRelationKey = "user_id_relation_";
 msgMuteKey = "msg_mute_";
 msgUnReadMuteKey = "msg_unread_mute_";
@@ -146,11 +177,9 @@ DefaultTitle = "DuckChat 聊天室";
 ////session Storage
 userIdsKey  = "user_ids";
 groupIdsKey = "group_ids";
-roomListKey = "room_list";
 sendMsgImgUrlKey = "msg_img_url_";
 msgIdInChatSessionKey = "msgId_in_chatSession_";
 reqProfile = "req_profile_";
-
 
 
 uploadImgForMsg  = "uploadImgForMsg";

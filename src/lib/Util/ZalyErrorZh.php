@@ -20,7 +20,6 @@ class ZalyErrorZh extends ZalyErrorBase
         "error.group.name.length"       => "群组名称长度不符合要求",
         "error.group.create.permission" => "该站点不允许创建群组",
         "error.group.create"  => "创建群组失败",
-        "error.group.info"    => "获取群信息失败",
         "error.group.exist"   => "群已经被解散",
         "error.group.owner"   => "只有群主可以操作",
         "error.group.admin"   => "没有权限操作",
@@ -35,11 +34,8 @@ class ZalyErrorZh extends ZalyErrorBase
         "error.group.remove.userId" => "移除成员不能为空",
         "error.group.remove.memberType" => "不能移除自己或者群主",
         "error.group.remove" => "操作失败",
-        "error.group.profileUpdate" => "更新失败",
-        "error.group.update.nameLength" => "群名长度超过限制",
         "error.group.quitOwner" => "群主不能退群",
         "error.group.quit" => "退群失败",
-        "error.group.groupMember.groupId" => "群id不存在",
         "error.group.update" => "更新失败",
         "error.friend.apply" => "申请失败",
         "error.friend.apply.friendExist" => "已经是好友",
@@ -59,6 +55,11 @@ class ZalyErrorZh extends ZalyErrorBase
 
         "error.verify.token" => "验证码错误",
         "error.update.pwd" => "更新密码失败",
+
+        "error.loginName.length" => "登录名长度不合法",
+        "error.password.length" => "密码长度不合法",
+        "error.nickname.length" => "昵称长度不合法",
+
     ];
 
     public function getErrorInfo($errorCode)

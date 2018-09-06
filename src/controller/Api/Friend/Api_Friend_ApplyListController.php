@@ -41,7 +41,6 @@ class Api_Friend_ApplyListController extends  BaseController
     private function getApplyList($offset, $count)
     {
         $list = $this->ctx->SiteFriendApplyTable->getApplyList( $this->userId, $offset, $count);
-        error_log("list ==" . json_encode($list));
         return $list;
     }
 

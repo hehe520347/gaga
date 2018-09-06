@@ -84,6 +84,27 @@ class SiteUserFriendTable extends BaseTable
         return $friends;
     }
 
+    public function queryUserFriend($userId, $friendUserId)
+    {
+        $tag = __CLASS__ . "->" . __FUNCTION__;
+        $startTime = $this->getCurrentTimeMills();
+
+        try {
+            $sql = "SELECT $this->selectColumns FROM $this->table WHERE userId=:userId and friendId=:friendId;";
+            $prepare = $this->db->prepare($sql);
+            $prepare->bindValue(":userId", $userId);
+            $prepare->bindValue(":friendId", $friendUserId);
+            $prepare->execute();
+
+            $result = $prepare->fetch(\PDO::FETCH_ASSOC);
+
+            return $result;
+        } finally {
+            $this->ctx->Wpf_Logger->dbLog($tag, $sql, [$userId], $startTime, $result);
+        }
+
+    }
+
     public function queryUserFriendCount($userId)
     {
         $tag = __CLASS__ . "->" . __FUNCTION__;
@@ -126,7 +147,6 @@ class SiteUserFriendTable extends BaseTable
             $prepare->bindValue(":friendId", $friendUserId);
             $prepare->execute();
             $count = $prepare->fetchColumn();
-//            $count = $prepare->fetchColumn(0); 第0列
         } finally {
             $this->ctx->Wpf_Logger->writeSqlLog($tag, $sql, ["userId" => $userId, "friendId" => $friendUserId], $startTime);
         }
@@ -145,38 +165,65 @@ class SiteUserFriendTable extends BaseTable
         return $relation1 == 1 && $relation2 == 1;
     }
 
-    public function queryUserFriend($userId)
+
+    /**
+     * get relation
+     *
+     * @param $userId
+     * @param $friendUserId
+     * @return mixed
+     */
+    public function getRealtion($userId, $friendUserId)
     {
         $tag = __CLASS__ . "->" . __FUNCTION__;
         $startTime = $this->getCurrentTimeMills();
-        $friends = [];
-
-        $sql = "SELECT
-                    a.userId,b.aliasName,b.aliasNameInLatin,a.loginName,a.nickname,a.nicknameInLatin,a.avatar
-                FROM
-                    $this->userTable AS a LEFT JOIN $this->table AS b ON b.friendId = a.userId
-                WHERE 
-                  b.userId=:userId
-                limit :offset, :limitCount;";
+        $result = false;
         try {
-
+            $sql = "SELECT $this->selectColumns as `count` FROM $this->table WHERE userId=:userId and friendId=:friendId;";
             $prepare = $this->db->prepare($sql);
-            $this->handlePrepareError($tag, $prepare);
-
             $prepare->bindValue(":userId", $userId);
+            $prepare->bindValue(":friendId", $friendUserId);
             $prepare->execute();
-
-            $result = $prepare->fetchAll(\PDO::FETCH_ASSOC);
-
-            if (!empty($result)) {
-                $friends = $result;
-            }
-
+            $result = $prepare->fetch(\PDO::FETCH_ASSOC);
         } finally {
+            $this->ctx->Wpf_Logger->writeSqlLog($tag, $sql, ["userId" => $userId, "friendId" => $friendUserId], $startTime);
         }
-
-        return $friends;
+        return $result;
     }
+
+
+//    public function queryUserFriend($userId)
+//    {
+//        $tag = __CLASS__ . "->" . __FUNCTION__;
+//        $startTime = $this->getCurrentTimeMills();
+//        $friends = [];
+//
+//        $sql = "SELECT
+//                    a.userId,b.aliasName,b.aliasNameInLatin,a.loginName,a.nickname,a.nicknameInLatin,a.avatar
+//                FROM
+//                    $this->userTable AS a LEFT JOIN $this->table AS b ON b.friendId = a.userId
+//                WHERE
+//                  b.userId=:userId
+//                limit :offset, :limitCount;";
+//        try {
+//
+//            $prepare = $this->db->prepare($sql);
+//            $this->handlePrepareError($tag, $prepare);
+//
+//            $prepare->bindValue(":userId", $userId);
+//            $prepare->execute();
+//
+//            $result = $prepare->fetchAll(\PDO::FETCH_ASSOC);
+//
+//            if (!empty($result)) {
+//                $friends = $result;
+//            }
+//
+//        } finally {
+//        }
+//
+//        return $friends;
+//    }
 
     public function updateData($where, $data)
     {

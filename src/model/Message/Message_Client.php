@@ -39,6 +39,7 @@ class Message_Client
                 $notice = $message->getNotice();
                 $noticeBody = $notice->getBody();
                 //# TODO limit body length 2KB = 2048 Byte
+                $noticeBody = substr($noticeBody, 0, 2048);
                 $notice->setBody($noticeBody);
                 $result = $this->saveU2Message($msgId, $userId, $fromUserId, $toUserId, $msgType, $notice, $roomType);
                 break;
@@ -46,6 +47,7 @@ class Message_Client
                 $text = $message->getText();
                 $textBody = $text->getBody();
                 //# TODO limit body length 2KB = 2048 Byte
+                $textBody = substr($textBody, 0, 2048);
                 $text->setBody($textBody);
                 $result = $this->saveU2Message($msgId, $userId, $fromUserId, $toUserId, $msgType, $text, $roomType);
                 break;
@@ -60,6 +62,7 @@ class Message_Client
             case \Zaly\Proto\Core\MessageType::MessageWeb:
                 $web = $message->getWeb();
                 $webCode = $web->getCode();
+                $webCode = substr($webCode, 0, 10240);
                 //# TODO limit body length 2KB = 2048 Byte
                 $web->setCode($webCode);
                 $result = $this->saveU2Message($msgId, $userId, $fromUserId, $toUserId, $msgType, $web, $roomType);
@@ -68,6 +71,7 @@ class Message_Client
                 $webNotice = $message->getWebNotice();
                 $webNoticeBody = $webNotice->getCode();
                 //# TODO limit body length 2KB = 2048 Byte
+                $webNoticeBody = substr($webNoticeBody, 0, 10240);
                 $webNotice->setCode($webNoticeBody);
                 $result = $this->saveU2Message($msgId, $userId, $fromUserId, $toUserId, $msgType, $webNotice, $roomType);
                 break;
@@ -102,6 +106,7 @@ class Message_Client
                 $notice = $message->getNotice();
                 $noticeBody = $notice->getBody();
                 //# TODO limit body length 2KB = 2048 Byte
+                $noticeBody = substr($noticeBody, 0, 2048);
                 $notice->setBody(trim($noticeBody));
                 $result = $this->saveGroupMessage($msgId, $fromUserId, $groupId, $msgType, $notice);
                 break;
@@ -109,6 +114,7 @@ class Message_Client
                 $text = $message->getText();
                 $textBody = $text->getBody();
                 //# TODO limit body length 2KB = 2048 Byte
+                $textBody = substr($textBody, 0, 2048);
                 $text->setBody(trim($textBody));
                 $result = $this->saveGroupMessage($msgId, $fromUserId, $groupId, $msgType, $text);
                 break;
@@ -124,6 +130,7 @@ class Message_Client
                 $web = $message->getWeb();
                 $webCode = $web->getCode();
                 ////# TODO limit body length 1B <= size <= 1M
+                $webCode = substr($webCode, 0, 10240);
                 $web->setCode($webCode);
                 $result = $this->saveGroupMessage($msgId, $fromUserId, $groupId, $msgType, $web);
                 break;
@@ -131,6 +138,7 @@ class Message_Client
                 $webNotice = $message->getWebNotice();
                 $webNoticeCode = $webNotice->getCode();
                 ////# TODO limit body length 1B <= size <= 1M
+                $webNoticeCode = substr($webNoticeCode, 0, 10240);
                 $webNotice->setCode($webNoticeCode);
                 $result = $this->saveGroupMessage($msgId, $fromUserId, $groupId, $msgType, $webNotice);
                 break;

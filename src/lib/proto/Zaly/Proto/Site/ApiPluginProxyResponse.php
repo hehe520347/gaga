@@ -14,13 +14,17 @@ use Google\Protobuf\Internal\GPBUtil;
 class ApiPluginProxyResponse extends \Google\Protobuf\Internal\Message
 {
     /**
-     * Generated from protobuf field <code>string body = 1;</code>
+     * Generated from protobuf field <code>bytes body = 1;</code>
      */
     private $body = '';
     /**
-     * Generated from protobuf field <code>string cookie = 2;</code>
+     * Generated from protobuf field <code>int32 httpCode = 2;</code>
      */
-    private $cookie = '';
+    private $httpCode = 0;
+    /**
+     * Generated from protobuf field <code>map<string, string> headers = 3;</code>
+     */
+    private $headers;
 
     public function __construct() {
         \GPBMetadata\Site\ApiPluginProxy::initOnce();
@@ -28,7 +32,7 @@ class ApiPluginProxyResponse extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>string body = 1;</code>
+     * Generated from protobuf field <code>bytes body = 1;</code>
      * @return string
      */
     public function getBody()
@@ -37,36 +41,58 @@ class ApiPluginProxyResponse extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>string body = 1;</code>
+     * Generated from protobuf field <code>bytes body = 1;</code>
      * @param string $var
      * @return $this
      */
     public function setBody($var)
     {
-        GPBUtil::checkString($var, True);
+        GPBUtil::checkString($var, False);
         $this->body = $var;
 
         return $this;
     }
 
     /**
-     * Generated from protobuf field <code>string cookie = 2;</code>
-     * @return string
+     * Generated from protobuf field <code>int32 httpCode = 2;</code>
+     * @return int
      */
-    public function getCookie()
+    public function getHttpCode()
     {
-        return $this->cookie;
+        return $this->httpCode;
     }
 
     /**
-     * Generated from protobuf field <code>string cookie = 2;</code>
-     * @param string $var
+     * Generated from protobuf field <code>int32 httpCode = 2;</code>
+     * @param int $var
      * @return $this
      */
-    public function setCookie($var)
+    public function setHttpCode($var)
     {
-        GPBUtil::checkString($var, True);
-        $this->cookie = $var;
+        GPBUtil::checkInt32($var);
+        $this->httpCode = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>map<string, string> headers = 3;</code>
+     * @return \Google\Protobuf\Internal\MapField
+     */
+    public function getHeaders()
+    {
+        return $this->headers;
+    }
+
+    /**
+     * Generated from protobuf field <code>map<string, string> headers = 3;</code>
+     * @param array|\Google\Protobuf\Internal\MapField $var
+     * @return $this
+     */
+    public function setHeaders($var)
+    {
+        $arr = GPBUtil::checkMapField($var, \Google\Protobuf\Internal\GPBType::STRING, \Google\Protobuf\Internal\GPBType::STRING);
+        $this->headers = $arr;
 
         return $this;
     }

@@ -29,10 +29,32 @@ class Api_Passport_PasswordRegController extends BaseController
             $password  = $request->getPassword();
             $nickname  = $request->getNickname();
             $sitePubkPem = $request->getSitePubkPem();
+            $invitationCode = $request->getInvitationCode();
+
+            if(!$loginName || mb_strlen($loginName) > 16 ) {
+                $errorCode = $this->zalyError->errorLoginNameLength;
+                $errorInfo = $this->zalyError->getErrorInfo($errorCode);
+                $this->setRpcError($errorCode, $errorInfo);
+                throw new Exception("loginName  is  not exists");
+            }
+
+            if(!$password) {
+                $errorCode = $this->zalyError->errorPassowrdLength;
+                $errorInfo = $this->zalyError->getErrorInfo($errorCode);
+                $this->setRpcError($errorCode, $errorInfo);
+                throw new Exception("password  is  not exists");
+            }
+
+            if(!$nickname || mb_strlen($nickname) > 16) {
+                $errorCode = $this->zalyError->errorNicknameLength;
+                $errorInfo = $this->zalyError->getErrorInfo($errorCode);
+                $this->setRpcError($errorCode, $errorInfo);
+                throw new Exception("nickname  is  not exists");
+            }
 
             $this->checkLoginName($loginName);
             $this->checkEmail($email);
-            $preSessionId = $this->registerUserForPassport($loginName, $email, $password, $nickname,$sitePubkPem);
+            $preSessionId = $this->registerUserForPassport($loginName, $email, $password, $nickname, $invitationCode, $sitePubkPem);
             $response = new \Zaly\Proto\Site\ApiPassportPasswordRegResponse();
             $response->setPreSessionId($preSessionId);
             $this->setRpcError($this->defaultErrorCode, "");
@@ -72,7 +94,7 @@ class Api_Passport_PasswordRegController extends BaseController
         }
     }
 
-    private function registerUserForPassport($loginName, $email, $password, $nickname,$sitePubkPem)
+    private function registerUserForPassport($loginName, $email, $password, $nickname, $invitationCode, $sitePubkPem)
     {
        try{
            $this->ctx->BaseTable->db->beginTransaction();
@@ -83,6 +105,8 @@ class Api_Passport_PasswordRegController extends BaseController
                "email"     => $email,
                "password"  => password_hash($password, PASSWORD_BCRYPT),
                "nickname"  => $nickname,
+               "invitationCode" => $invitationCode,
+               "timeReg" => ZalyHelper::getMsectime()
            ];
            $this->ctx->PassportPasswordTable->insertUserInfo($userInfo);
            $preSessionId = ZalyHelper::generateStrId();

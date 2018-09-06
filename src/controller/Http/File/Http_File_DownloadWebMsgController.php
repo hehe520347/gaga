@@ -14,19 +14,20 @@ class Http_File_DownloadWebMsgController extends \HttpBaseController
         $tag = __CLASS__."-".__FUNCTION__;
         try{
             $msgId   = $_GET['msgId'];
-            $isGroup = $_GET['isGroupMessage'];
+
+            $isGroupMessage = isset($_GET['isGroupMessage']) ? $_GET['isGroupMessage'] : "";
             if(!strlen($msgId)) {
                 throw new Exception("can't group load file");
             }
-            if($isGroup == true) {
+            if($isGroupMessage == true) {
                 $info = $this->ctx->SiteGroupMessageTable->checkUserCanLoadImg($msgId, $this->userId);
                 if(!$info) {
                     throw new Exception("can't group load file");
                 }
-                $this->ctx->Wpf_Logger->info($tag, "info ==" . json_encode($info) );
             } else {
                 ////TODO u2 can load img
                 $info = $this->ctx->SiteU2MessageTable->queryMessageByMsgId([$msgId]);
+
                 if(!$info) {
                     throw new Exception("can't u2 load file");
                 }

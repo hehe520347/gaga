@@ -143,10 +143,11 @@ class SiteGroupUserTable extends BaseTable
      * @param $groupId
      * @param $offset
      * @param $pageSize
+     * @param $memberType
      * @return mixed
      * @throws Exception
      */
-    public function getGroupUserList($groupId, $offset, $pageSize)
+    public function getGroupUserList($groupId, $offset, $pageSize, $memberType = false)
     {
         $tag = __CLASS__ . "_" . __FUNCTION__;
         $startTime = microtime(true);
@@ -167,12 +168,13 @@ class SiteGroupUserTable extends BaseTable
                 on 
                     siteGroupUser.userId = siteUser.userId 
                 where 
-                    siteGroupUser.groupId=:groupId  
-                order BY 
-                    siteGroupUser.timeJoin ASC 
-                limit 
-                    :offset, :pageSize;";
+                    siteGroupUser.groupId=:groupId";
 
+        if ($memberType) {
+            $sql .= " and siteGroupUser.memberType=:memberType";
+        }
+
+        $sql .= " order by siteGroupUser.timeJoin ASC limit :offset, :pageSize;";
 
         $prepare = $this->db->prepare($sql);
         $this->handlePrepareError($tag, $prepare);
@@ -180,9 +182,17 @@ class SiteGroupUserTable extends BaseTable
         $prepare->bindValue(":groupId", $groupId);
         $prepare->bindValue(":offset", $offset);
         $prepare->bindValue(":pageSize", $pageSize);
+
+        if ($memberType) {
+            $prepare->bindValue(":memberType", $memberType);
+        }
+
         $prepare->execute();
         $results = $prepare->fetchAll(\PDO::FETCH_ASSOC);
-        $this->ctx->Wpf_Logger->writeSqlLog($tag, $sql, $groupId, $startTime);
+
+//        $this->ctx->Wpf_Logger->info("============", "result=" . json_encode($results));
+
+        $this->ctx->Wpf_Logger->writeSqlLog($tag, $sql, [$groupId, $offset, $pageSize, $memberType], $startTime);
         return $results;
     }
 

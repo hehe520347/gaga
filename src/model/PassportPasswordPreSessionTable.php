@@ -41,6 +41,7 @@ class PassportPasswordPreSessionTable extends  BaseTable
                         passportPassword.userId,
                         passportPassword.loginName,
                         passportPassword.nickname,
+                        passportPassword.invitationCode,
                         passportPasswordPreSession.sitePubkPem
                     from 
                         passportPassword

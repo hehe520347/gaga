@@ -9,7 +9,7 @@
 class Api_Friend_AcceptController extends BaseController
 {
 
-    protected $action = "im.friend.accept";
+    protected $action = "api.friend.accept";
     private $classNameForRequest = '\Zaly\Proto\Site\ApiFriendAcceptRequest';
     private $classNameForResponse = '\Zaly\Proto\Site\ApiFriendAcceptResponse';
 
@@ -118,7 +118,13 @@ class Api_Friend_AcceptController extends BaseController
         $tag = __CLASS__ . "->" . __FUNCTION__;
         try {
             $fromUserId = $agreeUserId;
+
             $text = "I accept your friend apply, let's talk";
+
+//            if ($this->language == Zaly\Proto\Core\UserClientLangType::UserClientLangZH) {
+//                $text = "我接受了你的好友申请，现在开始聊天吧";
+//            }
+
             $this->ctx->Message_Client->proxyU2TextMessage($applyUserId, $fromUserId, $applyUserId, $text);
 
         } catch (Exception $e) {
@@ -128,11 +134,16 @@ class Api_Friend_AcceptController extends BaseController
         try {
             if (empty($greetings)) {
                 $greetings = "we are friends, just talk to me";
+
+                if ($this->language == Zaly\Proto\Core\UserClientLangType::UserClientLangZH) {
+                    $greetings = "我添加了你为好友，开始聊天吧";
+                }
             }
             $this->ctx->Message_Client->proxyU2TextMessage($fromUserId, $applyUserId, $fromUserId, $greetings);
         } catch (Exception $e) {
             $this->ctx->Wpf_Logger->error($tag, $e);
         }
+
     }
 
 }

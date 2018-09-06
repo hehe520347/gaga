@@ -13,6 +13,10 @@ use Google\Protobuf\Internal\GPBUtil;
  */
 class ApiFileDownloadResponse extends \Google\Protobuf\Internal\Message
 {
+    /**
+     * Generated from protobuf field <code>string contentType = 3;</code>
+     */
+    private $contentType = '';
     protected $ret;
 
     public function __construct() {
@@ -60,6 +64,28 @@ class ApiFileDownloadResponse extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->writeOneof(2, $var);
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>string contentType = 3;</code>
+     * @return string
+     */
+    public function getContentType()
+    {
+        return $this->contentType;
+    }
+
+    /**
+     * Generated from protobuf field <code>string contentType = 3;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setContentType($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->contentType = $var;
 
         return $this;
     }

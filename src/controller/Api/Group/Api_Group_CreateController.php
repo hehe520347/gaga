@@ -35,7 +35,8 @@ class Api_Group_CreateController extends Api_Group_BaseController
 
             ///TODO 修改groupName 限制长度
             $groupName = trim($request->getGroupName());
-            if (strlen($groupName) > $this->groupNameLength || strlen($groupName) < 1) {
+
+            if (mb_strlen($groupName) > $this->groupNameLength || mb_strlen($groupName) < 1) {
                 $errorCode = $this->zalyError->errorGroupNameLength;
                 $errorInfo = $this->zalyError->getErrorInfo($errorCode);
                 $this->setRpcError($errorCode, $errorInfo);
@@ -65,6 +66,11 @@ class Api_Group_CreateController extends Api_Group_BaseController
             $groupId = $groupProfile['groupId'];
 
             $noticeText = 'group created,invite your friends to join chat';
+
+            if ($this->language == Zaly\Proto\Core\UserClientLangType::UserClientLangZH) {
+                $noticeText = '群组已创建成功,邀请你的好友加入群聊吧';
+            }
+
             $this->ctx->Message_Client->proxyGroupNoticeMessage($this->userId, $groupId, $noticeText);
 
         } catch (Exception $ex) {
@@ -158,7 +164,7 @@ class Api_Group_CreateController extends Api_Group_BaseController
 
             return $response;
         } catch (Exception $ex) {
-            $errorCode = $this->zalyError->errorGroupInfo;
+            $errorCode = $this->zalyError->errorGroupProfile;
             $errorInfo = $this->zalyError->getErrorInfo($errorCode);
             $this->setRpcError($errorCode, $errorInfo);
             $this->ctx->Wpf_Logger->error($tag, "error_msg=" . $ex->getMessage());

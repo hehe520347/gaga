@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: zhangjun
@@ -8,19 +9,38 @@
 class InstallDBController
 {
     private $_dbPath = ".";
-    private $loginPluginIds=[100, 105];
+    private $loginPluginIds = [100, 105];
+    private $configName = "config.php";
+    private $sampleConfigName = "config.sample.php";
+    private $_dbName;
+    private $db;
+
+    /**
+     * @var ZalyHelper
+     */
+    private $helper;
 
     public function doIndex()
     {
-        $fileName = dirname(__FILE__) . "/../config.php";
-        $config = require($fileName);
+        $this->helper = new ZalyHelper();
 
-        $sqliteName = $config['sqlite']['sqliteDBName'];
-        if(!empty($sqliteName)) {
-            $sqliteName = dirname(__FILE__).'/../'.$sqliteName;
+        $configFileName = dirname(__FILE__) . "/../". $this->configName;
+        $sampleFileName = dirname(__FILE__) . "/../". $this->sampleConfigName;
+        if(file_exists($configFileName)) {
+            $config = require($configFileName);
+            $sqliteName = $config['sqlite']['sqliteDBName'];
+        } else {
+            $config = require($sampleFileName);
+            $sqliteName = "";
+        }
+
+        if (!empty($sqliteName)) {
+            $sqliteName = dirname(__FILE__) . '/../' . $sqliteName;
             $isInstalled = file_exists($sqliteName);
-            if($isInstalled) {
-                return true;
+            if ($isInstalled) {
+                $apiPageIndex = ZalyConfig::getApiPageIndexUrl();
+                header("Location:" . $apiPageIndex);
+                exit();
             }
         }
 
@@ -43,25 +63,21 @@ class InstallDBController
                 $config['msectime'] = ZalyHelper::getMsectime();
 
                 $contents = var_export($config, true);
-                file_put_contents($fileName, "<?php\n return {$contents};\n ");
+                file_put_contents($configFileName, "<?php\n return {$contents};\n ");
                 if (function_exists("opcache_reset")) {
                     opcache_reset();
                 }
 
-                error_log(" write  db init config =======" . json_encode($config));
-
-
                 $siteName = $host;
-                $this->initSite($sqliteName, $siteName, $host, $port, 'http', 'http');
+                $this->initSite($sqliteName, $siteName, $host, $port);
                 echo "success";
             } catch (Exception $ex) {
                 echo "fail";
                 return;
             }
-        } elseif($method == "GET") {
+        } elseif ($method == "GET") {
 
-
-            $permissionDirectory = is_writable( dirname(dirname(__FILE__)) );
+            $permissionDirectory = is_writable(dirname(dirname(__FILE__)));
             $configFile = dirname(dirname(__FILE__)) . "/config.php";
             $attachDir = dirname(dirname(__FILE__)) . "/attachment";
             if (file_exists($configFile) && !is_writable($configFile)) {
@@ -72,25 +88,25 @@ class InstallDBController
                 $permissionDirectory = false;
             }
 
-
             $params = [
                 "isPhpVersionValid" => version_compare(PHP_VERSION, "7.0.0") >= 1,
-                "isLoadOpenssl" => extension_loaded("openssl") && false!= ZalyRsa::newRsaKeyPair(2048),
+                "isLoadOpenssl" => extension_loaded("openssl") && false != ZalyRsa::newRsaKeyPair(2048),
                 "isLoadPDOSqlite" => extension_loaded("pdo_sqlite"),
                 "isLoadCurl" => extension_loaded("curl"),
-                "isWritePermission" =>  $permissionDirectory,
+                "isWritePermission" => $permissionDirectory,
             ];
             echo $this->display("init_installSite", $params);
             return;
         }
     }
 
-    private function display($viewName, $params = []) {
+    private function display($viewName, $params = [])
+    {
         // 自己实现实现一下这个方法，加载view目录下的文件
         // 自己实现实现一下这个方法，加载view目录下的文件
         ob_start();
         $fileName = str_replace("_", "/", $viewName);
-        $path = dirname(__DIR__).'/views/'.$fileName.'.php';
+        $path = dirname(__DIR__) . '/views/' . $fileName . '.php';
         if ($params) {
             extract($params, EXTR_SKIP);
         }
@@ -100,11 +116,11 @@ class InstallDBController
         return $var;
     }
 
-    private function initSite( $sqliteName,  $siteName, $siteHost, $Port, $defaultApiProtocol, $defaultImProtocol)
+    private function initSite($sqliteName, $siteName, $siteHost, $Port)
     {
         $this->_dbName = $sqliteName;
         $this->checkDBExists();
-        $this->_checkDBAndTable($siteName, $siteHost, $Port, $defaultApiProtocol, $defaultImProtocol);
+        $this->_checkDBAndTable($siteName, $siteHost, $Port);
     }
 
     private function checkDBExists()
@@ -113,10 +129,10 @@ class InstallDBController
         $this->db = new \PDO("sqlite:{$dbInfo}");
     }
 
-    private function _checkDBAndTable($siteName, $siteHost, $Port, $defaultApiProtocol, $defaultImProtocol)
+    private function _checkDBAndTable($siteName, $siteHost, $Port)
     {
         $this->_checkDBTables();
-        $this->_checkDefaultTableVal($siteName, $siteHost, $Port, $defaultApiProtocol, $defaultImProtocol);
+        $this->_checkConfigDefaultValue($siteName, $siteHost, $Port);
     }
 
 
@@ -137,6 +153,7 @@ class InstallDBController
 
         $this->_checkSiteGroupMessageTable();// check table + index
         $this->_checkSiteGroupMessagePointerTable();// check table + index
+        $this->_checkSiteUicTable();
 
         $this->_checkSiteUserFriendTable();
         $this->_checkSiteFriendApplyTable();
@@ -147,12 +164,15 @@ class InstallDBController
 
     }
 
-    private function _checkDefaultTableVal($siteName, $siteHost, $Port, $defaultApiProtocol, $defaultImProtocol)
+    private function _checkConfigDefaultValue($siteName, $siteHost, $Port)
     {
 //        $loginPluginId = 100;
         $loginPluginId = ZalyConfig::getConfig("loginPluginId");
-        $this->_insertSiteLoginPlugin($loginPluginId);
-        $this->_insertSiteConfig($loginPluginId, $siteName, $defaultApiProtocol, $defaultImProtocol);
+        $this->_insertSiteLoginPlugin();
+        $this->_insertSiteConfig($siteName, $loginPluginId);
+
+        $ownerUic = '000000';
+        $this->_insertSiteOwnerUic($ownerUic);
 
         //admin web
         $this->_insertSiteManagerPlugin($siteHost, $Port);
@@ -172,8 +192,9 @@ class InstallDBController
               applyTime BIGINT,
               UNIQUE(userId, friendId)
         );";
-        $this->db->exec($sql);
-
+        $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
     }
 
     private function _checkSiteConfigTable()
@@ -184,7 +205,9 @@ class InstallDBController
                   configValue TEXT ,
                   UNIQUE (configKey)
                 );";
-        $this->db->exec($sql);
+        $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
     }
 
     private function _checkSitePluginTable()
@@ -194,10 +217,10 @@ class InstallDBController
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               pluginId INTEGER NOT NULL,
               name VARCHAR(100) NOT NULL, /*名字*/
-              `logo` TEXT NOT NULL,/*logo*/
-              `order` INTEGER,/*排序 数值越小，排位靠前*/
-              `landingPageUrl` TEXT,/*落地页*/
-              `landingPageWithProxy` LONG, /*是否使用resp加载落地页*/
+              logo TEXT NOT NULL,/*logo*/
+              sort INTEGER,/*排序 数值越小，排位靠前*/
+              landingPageUrl TEXT,/*落地页*/
+              landingPageWithProxy LONG, /*是否使用resp加载落地页*/
               usageType INTEGER,          /*功能类型*/
               loadingType INTEGER,/*展现方式*/
                permissionType INTEGER ,    /*使用权限*/
@@ -205,10 +228,15 @@ class InstallDBController
                addTime BIGINT,
                UNIQUE(pluginId,usageType)
               );";
-        $this->db->exec($sql);
+        $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
 
-        $sql = "CREATE INDEX IF NOT EXISTS indexSitePluginOrder ON sitePlugin(\"order\");";
-        $this->db->exec($sql);
+        $indexSql = "CREATE INDEX IF NOT EXISTS indexSitePluginSort ON sitePlugin(sort);";
+        $prepare = $this->db->prepare($indexSql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
+
     }
 
     private function _checkSiteUserTable()
@@ -227,7 +255,9 @@ class InstallDBController
                    friendVersion INTEGER,
                    timeReg BIGINT
             );";
-        $this->db->exec($sql);
+        $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
     }
 
     private function _checkSiteUserFriendTable()
@@ -245,7 +275,9 @@ class InstallDBController
                     UNIQUE(userId, friendId)
                 );";
 
-        $this->db->exec($sql);
+        $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
     }
 
     private function _checkSiteSessionTable()
@@ -267,10 +299,14 @@ class InstallDBController
                 gatewaySocketId VARCHAR(100),
                 UNIQUE(sessionId,userId)
             );";
-        $this->db->exec($sql);
+        $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
 
         $indexSql = "CREATE INDEX IF NOT EXISTS indexSiteSessionUserId ON siteSession('userId');";
-        $this->db->exec($indexSql);
+        $prepare = $this->db->prepare($indexSql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
     }
 
     private function _checkSiteGroupTable()
@@ -294,7 +330,9 @@ class InstallDBController
                timeCreate BIGINT,
                UNIQUE(groupId)
         );";
-        $this->db->exec($sql);
+        $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
     }
 
     private function _checkSiteGroupUserTable()
@@ -308,7 +346,9 @@ class InstallDBController
                timeJoin BIGINT,
                UNIQUE(groupId, userId)
         );";
-        $this->db->exec($sql);
+        $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
     }
 
     private function _checkSiteU2MessageTable()
@@ -324,10 +364,14 @@ class InstallDBController
             content TEXT,   -- 可能是一个json，可能是一个proto toString
             msgTime BIGINT
             );";
-        $this->db->exec($sql);
+        $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
 
         $indexSql = "CREATE INDEX IF NOT EXISTS indexSiteU2MessageUserId ON siteU2Message(userId);";
-        $this->db->exec($indexSql);
+        $prepare = $this->db->prepare($indexSql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
     }
 
     private function _checkSiteU2MessagePointerTable()
@@ -339,10 +383,14 @@ class InstallDBController
             clientSideType INTEGER,     -- 0:无效，1:手机客户端  2:web客户端
             pointer INTEGER      
             );";
-        $this->db->exec($sql);
+        $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
 
         $indexSql = "CREATE UNIQUE INDEX IF NOT EXISTS indexSiteU2MessagePointerUd ON siteU2MessagePointer(userId,deviceId);";
-        $this->db->exec($indexSql);
+        $prepare = $this->db->prepare($indexSql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
     }
 
     private function _checkSiteGroupMessageTable()
@@ -356,10 +404,14 @@ class InstallDBController
             content TEXT,
             msgTime BIGINT
             );";
-        $this->db->exec($sql);
+        $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
 
         $indexSql = "CREATE INDEX IF NOT EXISTS indexSiteGroupMessageGroupId ON siteGroupMessage(groupId);";
-        $this->db->exec($indexSql);
+        $prepare = $this->db->prepare($indexSql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
     }
 
     private function _checkPassportPasswordTable()
@@ -371,12 +423,15 @@ class InstallDBController
                 password VARCHAR(100) NOT NULL,
                 nickname VARCHAR(100) NOT NULL,
                 loginName VARCHAR(100) NOT NULL,
+                invitationCode VARCHAR(100),
                 timeReg BIGINT,
                 unique(userId),
                 unique(email),
                 unique(loginName)
             );";
-        $this->db->exec($sql);
+        $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
     }
 
     private function _checkPassportPasswordPreSessionTable()
@@ -388,10 +443,12 @@ class InstallDBController
                 sitePubkPem TEXT,
                 unique(userId)
             );";
-        $this->db->exec($sql);
+        $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
     }
 
-    private  function _checkPassportPasswordTokenTable()
+    private function _checkPassportPasswordTokenTable()
     {
         $sql = "CREATE TABLE IF NOT EXISTS passportPasswordToken(
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -400,9 +457,10 @@ class InstallDBController
                 timeReg BIGINT,
                 UNIQUE(loginName)
             );";
-        $this->db->exec($sql);
+        $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
     }
-
 
 
     private function _checkSiteGroupMessagePointerTable()
@@ -415,26 +473,54 @@ class InstallDBController
             clientSideType INTEGER, -- 0:无效，1:手机客户端  2:web客户端
             pointer INTEGER
             );";
-        $this->db->exec($sql);
+        $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
 
         $indexSql = "CREATE INDEX IF NOT EXISTS indexSiteGroupMessagePointerGud ON siteGroupMessagePointer(groupId,userId,deviceId);";
-        $this->db->exec($indexSql);
+        $prepare = $this->db->prepare($indexSql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
+
     }
 
-    private function _insertSiteConfig($loginPluginId, $siteName, $apiProtocol, $imProtocol)
+
+    private function _checkSiteUicTable()
+    {
+        $sql = "CREATE TABLE IF NOT EXISTS siteUic(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            code VARCHAR(50) unique NOT NULL,
+            userId VARCHAR(100),
+            status INTEGER, -- 0：无效，1：所有人可用 2：会员可用等
+            createTime BIGINT,
+            useTime BIGINT
+            );";
+
+        $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
+
+        $indexSql = "CREATE INDEX IF NOT EXISTS indexSiteUicUserId ON siteUic(userId);";
+        $prepare = $this->db->prepare($indexSql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
+    }
+
+
+    private function _insertSiteConfig($siteName, $loginPluginId)
     {
         $siteConfig = SiteConfig::$siteConfig;
 
         $siteConfig[SiteConfig::SITE_NAME] = $siteName;
 
-        $siteConfig[SiteConfig::SITE_ADDRESS_FOR_API] = $apiProtocol;
-
-        $siteConfig[SiteConfig::SITE_ADDRESS_FOR_IM] = $imProtocol;
+        $siteConfig[SiteConfig::SITE_ENABLE_INVITATION_CODE] = 1;//init with uic when first user login
 
         $siteConfig[SiteConfig::SITE_LOGIN_PLUGIN_ID] = $loginPluginId;
 
-        $pubkAndPrikBase64 = SiteConfig::getPubkAndPrikPem();
-        $siteConfig = array_merge($siteConfig, $pubkAndPrikBase64);
+        $siteConfig[SiteConfig::SITE_PLUGIN_PLBLIC_KEY] = (new ZalyHelper())->generateStrKey(32);
+
+        $pubkAndPrikPems = SiteConfig::getPubkAndPrikPem();
+        $siteConfig = array_merge($siteConfig, $pubkAndPrikPems);
 
         $sqlStr = "";
         foreach ($siteConfig as $configKey => $configVal) {
@@ -446,61 +532,96 @@ class InstallDBController
                     values 
                         $sqlStr;";
         $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
         $prepare->execute();
     }
 
-    private function _insertSiteLoginPlugin($pluginId)
+    private function _insertSiteOwnerUic($code = "000000")
     {
+        $timeStamp = $this->helper->getMsectime();
+        $sql = "insert into siteUic(code,status,createTime) values('$code',100,$timeStamp)";
+        $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
+    }
 
+    private function _insertSiteLoginPlugin()
+    {
         $sql = 'insert into
-                    sitePlugin(pluginId, name, logo, `order`, landingPageUrl, usageType,loadingType,permissionType,authKey)
+                    sitePlugin(pluginId, name, logo, sort, landingPageUrl,landingPageWithProxy,usageType,loadingType,permissionType,authKey)
                 values
                     (100,
                     "登录注册页面",
                     "", 
                     100,
                     "http://open.akaxin.com:5208/index.php?action=page.login",
-                     ' . Zaly\Proto\Core\PluginUsageType::PluginUsageLogin . ', 
-                     ' . Zaly\Proto\Core\PluginLoadingType::PluginLoadingNewPage . ', 
-                     ' . Zaly\Proto\Core\PluginPermissionType::PluginPermissionAll . ',
-                     "");
+                    0,
+                    ' . Zaly\Proto\Core\PluginUsageType::PluginUsageLogin . ', 
+                    ' . Zaly\Proto\Core\PluginLoadingType::PluginLoadingNewPage . ', 
+                    ' . Zaly\Proto\Core\PluginPermissionType::PluginPermissionAll . ',
+                    "");
                 ';
-        $this->db->exec($sql);
+
+        $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
 
         $sql = 'insert into
-                    sitePlugin(pluginId, name, logo, `order`, landingPageUrl, usageType,loadingType,permissionType,authKey)
+                    sitePlugin(pluginId, name, logo, sort, landingPageUrl,landingPageWithProxy, usageType,loadingType,permissionType,authKey)
                 values
-                    (' . $pluginId . ',
+                    (105,
                     "密码账号注册页面",
                     "", 
                     105,
-                    "./index.php?action=page.loginSite",
+                    "index.php?action=page.loginSite",
+                    1,
                      ' . Zaly\Proto\Core\PluginUsageType::PluginUsageLogin . ', 
                      ' . Zaly\Proto\Core\PluginLoadingType::PluginLoadingNewPage . ', 
                      ' . Zaly\Proto\Core\PluginPermissionType::PluginPermissionAll . ',
                      "");
                 ';
-        $this->db->exec($sql);
+        $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
+
+        $sql = 'insert into
+                    sitePlugin(pluginId, name, logo, sort, landingPageUrl,landingPageWithProxy, usageType,loadingType,permissionType,authKey)
+                values
+                    (106,
+                    "gif",
+                    "", 
+                    106,
+                    "index.php?action=plugin.gif",
+                    1,
+                     ' . Zaly\Proto\Core\PluginUsageType::PluginUsageU2Message . ', 
+                     ' . Zaly\Proto\Core\PluginLoadingType::PluginLoadingNewPage . ', 
+                     ' . Zaly\Proto\Core\PluginPermissionType::PluginPermissionAll . ',
+                     "");
+                ';
+        $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+        $prepare->execute();
     }
 
     private function _insertSiteManagerPlugin($host, $port)
     {
         $pluginAddress = "http://" . $host . ":" . $port . "/index.php?action=manage.index";
         $sql = 'insert into
-                    sitePlugin(pluginId, name, logo, `order`, landingPageUrl, usageType,loadingType,permissionType,authKey)
+                    sitePlugin(pluginId, name, logo, sort, landingPageUrl, landingPageWithProxy,usageType,loadingType,permissionType,authKey)
                 values
                     (101,
                     "manager",
                     "", 
                     1,
                     "' . $pluginAddress . '",
+                    1,
                      ' . Zaly\Proto\Core\PluginUsageType::PluginUsageIndex . ', 
                      ' . Zaly\Proto\Core\PluginLoadingType::PluginLoadingNewPage . ', 
                      ' . Zaly\Proto\Core\PluginPermissionType::PluginPermissionAll . ',
                      "");
                 ';
         $prepare = $this->db->prepare($sql);
-
+        $this->handelPrepareError($prepare);
         $prepare->execute();
     }
 
@@ -508,13 +629,14 @@ class InstallDBController
     {
         $pluginAddress = "http://" . $host . ":" . $port . "/index.php?action=manage.index";
         $sql = 'insert into
-                    sitePlugin(pluginId, name, logo, `order`, landingPageUrl, usageType,loadingType,permissionType,authKey)
+                    sitePlugin(pluginId, name, logo, sort, landingPageUrl,landingPageWithProxy, usageType,loadingType,permissionType,authKey)
                 values
                     (102,
                     "square",
                     "", 
                     2,
                     "' . $pluginAddress . '",
+                    1,
                     ' . Zaly\Proto\Core\PluginUsageType::PluginUsageIndex . ', 
                     ' . Zaly\Proto\Core\PluginLoadingType::PluginLoadingNewPage . ', 
                     ' . Zaly\Proto\Core\PluginPermissionType::PluginPermissionAll . ',
@@ -522,8 +644,21 @@ class InstallDBController
                 ';
 
         $prepare = $this->db->prepare($sql);
+        $this->handelPrepareError($prepare);
+
         $prepare->execute();
     }
 
-
+    function handelPrepareError($prepare)
+    {
+        $this->wpf_Logger = new Wpf_Logger();
+        $tag = __CLASS__.'-'.__FUNCTION__;
+        if (!$prepare) {
+            $error = [
+                "error_code" => $this->db->errorCode(),
+                "error_info" => $this->db->errorInfo(),
+            ];
+            $this->wpf_Logger->error($tag, "error_msg=".json_encode($error));
+        }
+    }
 }

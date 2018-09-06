@@ -19,12 +19,7 @@ function zalyLoginConfig(results) {
     }
     enableInvitationCode = siteConfig.enableInvitationCode;
     enableRealName=siteConfig.enableRealName;
-    if(siteConfig.hasOwnProperty("siteIdPubkPem")) {
-        sitePubkPem = siteConfig.siteIdPubkPem;
-    }
-    if(siteConfig.hasOwnProperty("siteIdPubkBase64")) {
-        sitePubkPem = siteConfig.siteIdPubkBase64;
-    }
+    sitePubkPem = siteConfig.sitePubkPem;
 }
 
 function loginSuccess()
@@ -55,7 +50,6 @@ function loginNameExist()
     alert("用户名已经在站点被注册");
 }
 
-
 function loginNameNotExist()
 {
     var action = "api.passport.passwordReg";
@@ -65,6 +59,8 @@ function loginNameNotExist()
         email:registerEmail,
         nickname:registernNickname,
         sitePubkPem:sitePubkPem,
+        invitationCode:invitationCode,
     }
+    // alert("Json=="+JSON.stringify(reqData));
     handleClientSendRequest(action, reqData, handlePassportPasswordReg);
 }

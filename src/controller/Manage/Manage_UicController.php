@@ -11,9 +11,53 @@ class Manage_UicController extends ManageController
 
     public function doRequest()
     {
-        $this->ctx->Wpf_Logger->info("1111111", 'mange index');
-        echo $this->display("manage_uicIndex");
+        $page = $_GET['page'];
+        $params = ["lang" => $this->language];
+
+        $this->ctx->Wpf_Logger->info("--------------", "page=" . $page);
+
+        switch ($page) {
+            case "index":
+                $this->toPageIndex($params);
+                break;
+            case "used":
+                $this->toPageUsed($params);
+                break;
+            default:
+                $this->toPageIndex($params);
+        }
+
+        $this->ctx->Wpf_Logger->info("--------------", json_encode($params));
+
         return;
     }
 
+    /**
+     * @param array $params
+     */
+    private function toPageIndex($params)
+    {
+        $unusedList = $this->getUnuseUicList(1, 50);
+        $params['unusedList'] = $unusedList;
+        echo $this->display("manage_uic_index", $params);
+    }
+
+    private function toPageUsed($params)
+    {
+        $usedList = $this->getUsedUicList(1, 50);
+
+        $params["usedList"] = $usedList;
+
+        echo $this->display("manage_uic_usedList", $params);
+    }
+
+    private function getUnuseUicList($pageNum, $pageSize)
+    {
+        return $this->ctx->SiteUicTable->queryUnusedUic($pageNum, $pageSize);
+    }
+
+    private function getUsedUicList($pageNum, $pageSize)
+    {
+        return $this->ctx->SiteUicTable->queryUsedUic($pageNum, $pageSize);
+    }
 }

@@ -47,7 +47,7 @@ class ApiPushAuthRequest extends \Google\Protobuf\Internal\Message
      */
     private $timestampSeconds = '';
     /**
-     * sign(pushToken)
+     * sign(timestampSeconds)
      *
      * Generated from protobuf field <code>string signTimestampBase64 = 8;</code>
      */
@@ -55,9 +55,15 @@ class ApiPushAuthRequest extends \Google\Protobuf\Internal\Message
     /**
      * sign(sitePubkPem)
      *
-     * Generated from protobuf field <code>string signSitePubkPem = 9;</code>
+     * Generated from protobuf field <code>string signSitePubkPemBase64 = 9;</code>
      */
-    private $signSitePubkPem = '';
+    private $signSitePubkPemBase64 = '';
+    /**
+     * site userId
+     *
+     * Generated from protobuf field <code>string siteUserId = 10;</code>
+     */
+    private $siteUserId = '';
 
     public function __construct() {
         \GPBMetadata\Platform\ApiPushAuth::initOnce();
@@ -223,7 +229,7 @@ class ApiPushAuthRequest extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * sign(pushToken)
+     * sign(timestampSeconds)
      *
      * Generated from protobuf field <code>string signTimestampBase64 = 8;</code>
      * @return string
@@ -234,7 +240,7 @@ class ApiPushAuthRequest extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * sign(pushToken)
+     * sign(timestampSeconds)
      *
      * Generated from protobuf field <code>string signTimestampBase64 = 8;</code>
      * @param string $var
@@ -251,25 +257,51 @@ class ApiPushAuthRequest extends \Google\Protobuf\Internal\Message
     /**
      * sign(sitePubkPem)
      *
-     * Generated from protobuf field <code>string signSitePubkPem = 9;</code>
+     * Generated from protobuf field <code>string signSitePubkPemBase64 = 9;</code>
      * @return string
      */
-    public function getSignSitePubkPem()
+    public function getSignSitePubkPemBase64()
     {
-        return $this->signSitePubkPem;
+        return $this->signSitePubkPemBase64;
     }
 
     /**
      * sign(sitePubkPem)
      *
-     * Generated from protobuf field <code>string signSitePubkPem = 9;</code>
+     * Generated from protobuf field <code>string signSitePubkPemBase64 = 9;</code>
      * @param string $var
      * @return $this
      */
-    public function setSignSitePubkPem($var)
+    public function setSignSitePubkPemBase64($var)
     {
         GPBUtil::checkString($var, True);
-        $this->signSitePubkPem = $var;
+        $this->signSitePubkPemBase64 = $var;
+
+        return $this;
+    }
+
+    /**
+     * site userId
+     *
+     * Generated from protobuf field <code>string siteUserId = 10;</code>
+     * @return string
+     */
+    public function getSiteUserId()
+    {
+        return $this->siteUserId;
+    }
+
+    /**
+     * site userId
+     *
+     * Generated from protobuf field <code>string siteUserId = 10;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setSiteUserId($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->siteUserId = $var;
 
         return $this;
     }

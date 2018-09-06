@@ -33,6 +33,7 @@ abstract class BaseController extends \Wpf_Controller
         "api.session.verify",
         "api.passport.passwordFindPassword",
         "api.passport.passwordResetPassword",
+        "api.plugin.proxy",
     ];
     protected $sessionIdTimeOut = 36000000; //10个小时的毫秒
     protected $userId;
@@ -42,6 +43,9 @@ abstract class BaseController extends \Wpf_Controller
     public $defaultErrorCode = "success";
     public $defaultPageSize = 200;
     public $defaultPage = 1;
+    public $errorSiteInit = "error.site.init";
+
+    protected $language = Zaly\Proto\Core\UserClientLangType::UserClientLangEN;
 
     /**
      * @var BaseCtx
@@ -123,25 +127,20 @@ abstract class BaseController extends \Wpf_Controller
     // ignore.~
     public function __construct(Wpf_Ctx $context)
     {
-        if(!$this->checkDBIsExist()) {
-            return false;
-            exit;
+        if (!$this->checkDBIsExist()) {
+            $this->action = $_GET['action'];
+            $this->requestTransportData = new \Zaly\Proto\Core\TransportData();
+            $this->setRpcError($this->errorSiteInit, ZalyConfig::getApiPageSiteInit());
+            $this->bodyFormatType = isset($_GET['body_format']) ? $_GET['body_format'] : "";
+            $this->bodyFormatType = strtolower($this->bodyFormatType);
+            if (!in_array($this->bodyFormatType, $this->bodyFormatArr)) {
+                $this->bodyFormatType = $this->defaultBodyFormat;
+            }
+            $this->rpcReturn($this->action, null);
+            exit();
         }
-
         $this->ctx = new BaseCtx();
     }
-
-    public function checkDBIsExist()
-    {
-        $sqliteConfig = ZalyConfig::getConfig("sqlite");
-        $sqliteName = $sqliteConfig['sqliteDBName'];
-        $sqliteName = dirname(__FILE__).'/../'.$sqliteName;
-        if(file_exists($sqliteName)) {
-            return true;
-        }
-        return false;
-    }
-
 
     /**
      * 处理方法， 根据bodyFormatType, 获取transData
@@ -153,10 +152,7 @@ abstract class BaseController extends \Wpf_Controller
 
         parent::doIndex();
 
-
-        if(!$this->ctx->db) {
-            $this->ctx = new BaseCtx();
-        }
+        $this->ctx = new BaseCtx();
 
         // 判断请求格式 json， pb, pb64
         // body_format 只从$_GET中接收
@@ -177,7 +173,7 @@ abstract class BaseController extends \Wpf_Controller
         // 将数据转为TransportData
         $this->requestTransportData = new \Zaly\Proto\Core\TransportData();
 
-        if(!ZalyHelper::checkOpensslEncryptExists()){
+        if (!ZalyHelper::checkOpensslEncryptExists()) {
             $this->ctx->Wpf_Logger->error($tag, "none has openssl function exists");
             // disabled the rpcReturn online.
             $this->setRpcError("error.proto.parse", "openssl_encrypt is not exists");
@@ -224,7 +220,10 @@ abstract class BaseController extends \Wpf_Controller
 
         // $this->ctx->Wpf_Logger->error($tag, "request  packageId =" . $this->requestTransportData->getPackageId());
         $this->handleHeader();
+
+        $this->getAndSetClientLang();
         $this->getZalyErrorLang();
+
         $this->checkSessionId($this->action);
         $this->rpc($requestMessage, $this->requestTransportData);
     }
@@ -315,7 +314,8 @@ abstract class BaseController extends \Wpf_Controller
     public function getPublicUserProfile($userInfo)
     {
         $publicUserProfile = new \Zaly\Proto\Core\PublicUserProfile();
-        $publicUserProfile->setAvatar($userInfo['avatar']);
+        $avatar = isset($userInfo['avatar']) ? $userInfo['avatar'] : "";
+        $publicUserProfile->setAvatar($avatar);
         $publicUserProfile->setUserId($userInfo['userId']);
         $publicUserProfile->setLoginname($userInfo['loginName']);
         $publicUserProfile->setNickname($userInfo['nickname']);
@@ -353,4 +353,21 @@ abstract class BaseController extends \Wpf_Controller
         }
         fastcgi_finish_request();
     }
+
+    protected function getAndSetClientLang()
+    {
+        $requestTransportData = $this->requestTransportData;
+        $headers = $requestTransportData->getHeader();
+
+
+        $headLang = isset($headers[TransportDataHeaderKey::HeaderUserClientLang]) ? $headers[TransportDataHeaderKey::HeaderUserClientLang] : "";
+
+        $this->ctx->Wpf_Logger->info("client-language", "==" . $headLang);
+
+        if (isset($headLang) && $headLang == Zaly\Proto\Core\UserClientLangType::UserClientLangZH) {
+            $this->language = Zaly\Proto\Core\UserClientLangType::UserClientLangZH;
+        }
+
+    }
+
 }

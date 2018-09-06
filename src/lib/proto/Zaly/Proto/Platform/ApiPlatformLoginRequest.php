@@ -13,6 +13,7 @@ use Google\Protobuf\Internal\GPBUtil;
  * action: platform.api.platform.login
  * error:
  *    error.phone  the phone number format is invalid.
+ *    error.needRegister
  *
  * Generated from protobuf message <code>platform.ApiPlatformLoginRequest</code>
  */
@@ -30,6 +31,14 @@ class ApiPlatformLoginRequest extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>string verifyCode = 3;</code>
      */
     private $verifyCode = '';
+    /**
+     * Generated from protobuf field <code>string sitePubkPem = 4;</code>
+     */
+    private $sitePubkPem = '';
+    /**
+     * Generated from protobuf field <code>string loginNameForRegister = 5;</code>
+     */
+    private $loginNameForRegister = '';
 
     public function __construct() {
         \GPBMetadata\Platform\ApiPlatformLogin::initOnce();
@@ -98,6 +107,50 @@ class ApiPlatformLoginRequest extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->verifyCode = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>string sitePubkPem = 4;</code>
+     * @return string
+     */
+    public function getSitePubkPem()
+    {
+        return $this->sitePubkPem;
+    }
+
+    /**
+     * Generated from protobuf field <code>string sitePubkPem = 4;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setSitePubkPem($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->sitePubkPem = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>string loginNameForRegister = 5;</code>
+     * @return string
+     */
+    public function getLoginNameForRegister()
+    {
+        return $this->loginNameForRegister;
+    }
+
+    /**
+     * Generated from protobuf field <code>string loginNameForRegister = 5;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setLoginNameForRegister($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->loginNameForRegister = $var;
 
         return $this;
     }

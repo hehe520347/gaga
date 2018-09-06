@@ -45,9 +45,8 @@ class Api_Session_VerifyController extends BaseController
                 $this->setRpcError($errorCode, $errorInfo);
                 throw new Exception($errorInfo);
             }
-            $sitePubkPem = base64_decode($userInfo['sitePubkPem']);
-            $nickname    = $userInfo['nickname'];
-            $response = $this->buildApiSessionVerifyResponse($userInfo, $sitePubkPem, $nickname);
+
+            $response = $this->buildApiSessionVerifyResponse($userInfo);
 
             $this->ctx->PassportPasswordPreSessionTable->delInfoByPreSessionId($preSessionId);
             $this->setRpcError($this->defaultErrorCode, "");
@@ -58,25 +57,31 @@ class Api_Session_VerifyController extends BaseController
         }
     }
 
-    private function buildApiSessionVerifyResponse($userInfo, $sitePubkPem, $nickname)
+    private function buildApiSessionVerifyResponse($userInfo)
     {
         $tag = __CLASS__ . "-" . __FUNCTION__;
         try {
+            $sitePubkPem = base64_decode($userInfo['sitePubkPem']);
+            $nickname = $userInfo['nickname'];
+
             $userId = sha1($userInfo['userId'] . "@" . $sitePubkPem);
             $userProfile = new \Zaly\Proto\Platform\LoginUserProfile();
             $userProfile->setUserId($userId);
             $userProfile->setLoginName($userInfo['loginName']);
             $userProfile->setNickName($nickname);
+            $userProfile->setInvitationCode($userInfo['invitationCode']);
             $loginUserProfileKey = $this->generateStrKey();
             $key = $this->ctx->ZalyRsa->encrypt($loginUserProfileKey, $sitePubkPem);
             $aesStr = $this->ctx->ZalyAes->encrypt(serialize($userProfile), $loginUserProfileKey);
+
+            $this->ctx->Wpf_Logger->info("site: api.session.verify", "profile=" . json_encode($userProfile));
 
             $response = new \Zaly\Proto\Platform\ApiSessionVerifyResponse();
             $response->setKey($key);
             $response->setEncryptedProfile($aesStr);
             return $response;
         } catch (Exception $ex) {
-            $this->ctx->Wpf_Logger->info($tag, " error_msg=" . $ex->getMessage());
+            $this->ctx->Wpf_Logger->info($tag, " error_msg=" . $ex);
             throw new Exception("get response failed");
         }
     }

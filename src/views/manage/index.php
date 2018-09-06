@@ -227,26 +227,6 @@
             </div>
             <div class="division-line"></div>
 
-            <div class="item-row" id="data-report-id">
-                <!--                <div class="item-row-inner">-->
-                <div class="item-header">
-                    <img class="site-manage-image"
-                         src="data:image/png;base64,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"/>
-                </div>
-                <div class="item-body">
-                    <div class="item-body-display">
-                        <div class="item-body-desc">数据报表</div>
-
-                        <div class="item-body-tail">
-                            <img class="more-img"
-                                 src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAnCAYAAAAVW4iAAAABfElEQVRIS8WXvU6EQBCAZ5YHsdTmEk3kJ1j4HDbGxMbG5N7EwkIaCy18DxtygMFopZ3vAdkxkMMsB8v+XqQi2ex8ux/D7CyC8NR1fdC27RoRszAMv8Ux23ccJhZFcQoA9wCQAMAbEd0mSbKxDTzM6wF5nq+CIHgGgONhgIi+GGPXURTlLhDstDRN8wQA5zOB3hljFy66sCzLOyJaL6zSSRdWVXVIRI9EdCaDuOgavsEJY+wFEY8WdmKlS5ZFMo6xrj9AF3EfukaAbcp61TUBdJCdn85J1yzApy4pwJeuRYAPXUqAqy4tgIsubYCtLiOAjS5jgKkuK8BW1w0APCgOo8wKMHcCzoA+AeDSGKA4AXsOEf1wzq/SNH01AtjUKG2AiZY4jj9GXYWqazDVIsZT7sBGizbAVosWwEWLEuCqZRHgQ4sU4EvLLMCnlgnAt5YRYB9aRoD/7q77kivWFlVZ2R2XdtdiyTUNqpNFxl20bBGT7ppz3t12MhctIuwXEK5/O55iCBQAAAAASUVORK5CYII="/>
-                        </div>
-                    </div>
-
-                </div>
-                <!--                </div>-->
-            </div>
-            <div class="division-line"></div>
         </div>
 
     </div>
@@ -328,6 +308,13 @@
         return false;
     }
 
+    function isMobile() {
+        if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+            return true;
+        }
+        return false;
+    }
+
     function jsonToQueryString(json) {
         url = Object.keys(json).map(function (k) {
             return encodeURIComponent(k) + '=' + encodeURIComponent(json[k])
@@ -335,6 +322,13 @@
         return url
     }
 
+    function getLanguage() {
+        var nl = navigator.language;
+        if ("zh-cn" == nl || "zh-CN" == nl) {
+            return 1;
+        }
+        return 0;
+    }
 
     //
     //
@@ -409,45 +403,99 @@
         }
     }
 
-    // history.pushState(null, null, document.URL);
-    // window.addEventListener('popstate', function () {
-    //     history.pushState(null, null, document.URL);
-    // });
+    function zalyjsCommonAjaxGet(url, callBack) {
+        $.ajax({
+            url: url,
+            method: "GET",
+            success: function (result) {
+
+                callBack(url, result);
+
+            },
+            error: function (err) {
+                alert("error");
+            }
+        });
+
+    }
+
+
+    function zalyjsCommonAjaxPost(url, value, callBack) {
+        $.ajax({
+            url: url,
+            method: "POST",
+            data: value,
+            success: function (result) {
+                callBack(url, value, result);
+            },
+            error: function (err) {
+                alert("error");
+            }
+        });
+
+    }
+
+    function zalyjsCommonAjaxPostJson(url, jsonBody, callBack) {
+        $.ajax({
+            url: url,
+            method: "POST",
+            data: jsonBody,
+            success: function (result) {
+
+                callBack(url, jsonBody, result);
+
+            },
+            error: function (err) {
+                alert("error");
+            }
+        });
+
+    }
+
+    /**
+     * _blank    在新窗口中打开被链接文档。
+     * _self    默认。在相同的框架中打开被链接文档。
+     * _parent    在父框架集中打开被链接文档。
+     * _top    在整个窗口中打开被链接文档。
+     * framename    在指定的框架中打开被链接文档。
+     *
+     * @param url
+     * @param target
+     */
+    function zalyjsCommonOpenPage(url) {
+        location.href = url;
+    }
 
     $("#site-config-id").click(function () {
-        var url = "index.php?action=manage.config";
-        // alert("url=" + url);
-        zalyjsNavOpenPage(url, null);
+        var url = "/index.php?action=manage.config&lang=" + getLanguage();
+        zalyjsCommonOpenPage(url);
     });
 
     $("#mini-program-id").click(function () {
-        var url = "index.php?action=manage.miniProgram";
+        var url = "index.php?action=manage.miniProgram&lang=" + getLanguage();
         // alert("url=" + url);
-        zalyjsNavOpenPage(url);
+        zalyjsCommonOpenPage(url);
     });
 
     $("#user-manage-id").click(function () {
-        var url = "index.php?action=manage.user";
-        // alert("url=" + url);
-        zalyjsNavOpenPage(url);
+        var url = "index.php?action=manage.user&lang=" + getLanguage();
+        zalyjsCommonOpenPage(url);
     });
 
     $("#group-manage-id").click(function () {
-        var url = "index.php?action=manage.group";
-        // alert("url=" + url);
-        zalyjsNavOpenPage(url);
+        var url = "index.php?action=manage.group&lang=" + getLanguage();
+        zalyjsCommonOpenPage(url);
     });
 
     $("#uic-manage-id").click(function () {
-        var url = "index.php?action=manage.uic";
-        // alert("url=" + url);
-        zalyjsNavOpenPage(url);
+        var url = "index.php?action=manage.uic&page=index&lang=" + getLanguage();
+        zalyjsCommonOpenPage(url);
     });
 
     $("#data-report-id").click(function () {
         var url = "index.php?action=manage.dataReport";
         // alert("url=" + url);
-        zalyjsNavOpenPage(url);
+        zalyjsCommonOpenPage(url);
     });
 
 </script>

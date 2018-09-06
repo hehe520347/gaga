@@ -72,6 +72,8 @@ class Api_File_DownloadController extends \BaseController
             } else {
                 $response->setFile($content);
             }
+            $response->setContentType($this->ctx->File_Manager->contentType($fileId));
+
             $this->setRpcError($this->defaultErrorCode, "");
             $this->rpcReturn($this->getRequestAction(), $response);
         }catch (Exception $ex) {

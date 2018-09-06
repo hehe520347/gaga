@@ -13,10 +13,42 @@ use Google\Protobuf\Internal\GPBUtil;
  */
 class ApiPushAuthResponse extends \Google\Protobuf\Internal\Message
 {
+    /**
+     *site is mute
+     *
+     * Generated from protobuf field <code>bool siteIsMute = 1;</code>
+     */
+    private $siteIsMute = false;
 
     public function __construct() {
         \GPBMetadata\Platform\ApiPushAuth::initOnce();
         parent::__construct();
+    }
+
+    /**
+     *site is mute
+     *
+     * Generated from protobuf field <code>bool siteIsMute = 1;</code>
+     * @return bool
+     */
+    public function getSiteIsMute()
+    {
+        return $this->siteIsMute;
+    }
+
+    /**
+     *site is mute
+     *
+     * Generated from protobuf field <code>bool siteIsMute = 1;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setSiteIsMute($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->siteIsMute = $var;
+
+        return $this;
     }
 
 }

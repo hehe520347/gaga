@@ -46,14 +46,14 @@
 
             <div class="msg_status" style="margin-top: 1rem;">
                 <div class="msg-content hint--bottom" aria-label="{{msgTime}}">
-                    <div class="text-align-left" style=" width: 19rem; height:19rem;"><iframe src="{{hrefURL}}" frameborder="no" width="19rem" height="19rem"></iframe></div>
+                    <div class="text-align-left" style=" width: 19rem; height:19rem;"><iframe src="{{hrefURL}}" frameborder="no" width="190px" height="190px"></iframe></div>
                 </div>
                 {{if hrefURL}}
-                    <div  class="msg_status_img msg_status_failed_{{msgId}}" msgId="{{msgId}}"  style="display: flex;">
-                        <img src="../../public/img/msg/web_msg_click.png" style="width:2rem;height:2rem; left: -3rem;">
+                    <div  class="msg_status_img" msgId="{{msgId}}"  style="display: flex;">
+                        <img src="../../public/img/msg/web_msg_click.png"  class="web-msg-click" style="width:2rem;height:2rem; left: -3rem;" src-data="{{hrefURL}}">
                     </div>
                 {{else}}
-                    <div  class="msg_status_img msg_status_failed_{{msgId}}" msgId="{{msgId}}"  style="display: flex;">
+                    <div  class="msg_status_img " msgId="{{msgId}}"  style="display: flex;">
                         <img src="../../public/img/msg/web_msg_unclick.png" style="width:2rem;height:2rem; left: -3rem ;">
                     </div>
                 {{/if}}
@@ -117,16 +117,16 @@
                         <div class="msg-content hint--bottom" aria-label="{{msgTime}}" style="margin-top: 1rem;">
                 {{/if}}
 
-                        <div class="text-align-right" style=" width: 19rem; height:19rem;"><iframe src="{{hrefURL}}" frameborder="no" width="19rem" height="19rem"></iframe></div>
+                        <div class="text-align-right" style=" width: 19rem; height:19rem;"><iframe src="{{hrefURL}}" frameborder="no" width="190px" height="190px"></iframe></div>
                     </div>
 
 
                     {{if hrefURL}}
-                        <div  class="msg_status_img msg_status_failed_{{msgId}}" msgId="{{msgId}}"  style="display: flex;">
-                            <img src="../../public/img/msg/web_msg_click.png" style="width:2rem;height:2rem; left: 22rem ;">
+                        <div  class="msg_status_img  web-msg-click" msgId="{{msgId}}" src-data="{{hrefURL}}" style="display: flex;">
+                            <img src="../../public/img/msg/web_msg_click.png"  class="web-msg-click" src-data="{{hrefURL}}" style="width:2rem;height:2rem; left: 22rem ;">
                         </div>
                     {{else}}
-                        <div  class="msg_status_img msg_status_failed_{{msgId}}" msgId="{{msgId}}"  style="display: flex;">
+                        <div  class="msg_status_img " msgId="{{msgId}}"  style="display: flex;">
                             <img src="../../public/img/msg/web_msg_unclick.png" style="width:2rem;height:2rem;  left: 22rem;">
                         </div>
                     {{/if}}
@@ -312,14 +312,16 @@
                      margin-left: -3.5rem;" onclick="uploadFile('file2')" />
             <input type="file" id="file2" style="display:none" onchange="uploadUserImgFromInput(this)" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg">
         </div>
-
         <div class="d-flex flex-row justify-content-center selfNickNameDiv"  >
             {{if !nickname }}
-             <input type="text" style="padding: 0rem;"id="selfNickname" class="nickname create_group_box_div_input"  placeholder="昵称" onkeydown="updateSelfNickName(event);">
+                <div style="margin-left: 1rem;" class="nickNameDiv"> <img src="../../public/img/edit.png" style="width: 1rem;height:1rem"/></div>
             {{else}}
-                <input type="text" id="selfNickname"  style="padding: 0rem;" class="nickname create_group_box_div_input"  value="{{nickname}}" onkeydown="updateSelfNickName(event);">
+            <div style="margin-left: 1rem;" class="nickNameDiv">{{nickname}} <img src="../../public/img/edit.png" style="width: 1rem;height:1rem"/></div>
             {{/if}}
-            <input type="text" id="selfNickname"   style="padding: 0rem;" class="nickname create_group_box_div_input"  value="{{loginName}}" disabled>
+        </div>
+
+        <div class="d-flex flex-row justify-content-center selfNickNameDiv"  >
+            <input type="text"    style="padding: 0rem;" class="loginName create_group_box_div_input"  value="{{loginName}}" disabled>
         </div>
 
         <div style="text-align: center;margin:0 auto;width: 34rem; height:1px;background:rgba(223,223,223,1);" ></div>
@@ -327,11 +329,10 @@
 <!--            <div class="self-qrcode" id="self-qrcode" style="margin-top: 1rem;" >-->
 <!--                <span data-local-value="friendQrcodeTip">Self Qrcode</span>-->
 <!--            </div>-->
-            <div class="self-qrcode" id="logout">
-                <span  data-local-value="logoutTip">Logout</span>
+            <div class="self-qrcode" id="logout" >
+                <span class="logout-span" id="logout-span" data-local-value="logoutTip" onclick="logout()">Logout</span>
             </div>
         </div>
-
     </div>
 <!--    <div id="selfQrcodeDiv" class="selfQrcodeDiv"  style="position: absolute;display: none;">-->
 <!--        <div id="selfQrcodeCanvas">-->
@@ -381,4 +382,43 @@
             <div class="p-2 no_data_tip" data-local-value="noFriendDataTip">No Friends For Invite</div>
         </div>
     </div>
+</script>
+
+<script id="tpl-nickname-div" type="text/html">
+   <input type="text" id="selfNickname"  style="padding: 0rem;" class="nickname create_group_box_div_input"  value="{{nickname}}" onkeydown="updateSelfNickName(event);" />
+</script>
+
+<script id="tpl-group-name-div" type="text/html">
+    {{if editor == 1 }}
+        <input type="text" id="groupName" style="padding: 0rem;height:2rem;outline:none;margin-top:1rem;"  value="{{groupName}}" onkeydown="updateGroupNameName(event);" />
+    {{else}}
+            <div class="action-btn groupName">
+        {{groupName}}
+            </div>
+    {{/if}}
+</script>
+
+<script id="tpl-share-group-div" type="text/html">
+        <div  style="width: 23rem;margin: 0 auto;margin-top: 3rem; ">
+            <div class="qrcodeCanvas-title" >
+                <div class="header" style="width: 5rem;height: 5rem;margin-right: 1rem">
+                    <img class="group_avatar info-avatar-{{groupId}}" src="../../public/img/msg/group_default_avatar.png" style="width: 5rem;height: 5rem;">
+                </div>
+                <div>
+                    <div class="name" style="margin-top: 1rem;">
+                        <span style="font-size:1.69rem;font-family:PingFangSC-Regular;color:rgba(20,16,48,1);">{{groupName}} </span>
+                    </div>
+                    <div class="name" >
+                        <span style="font-size:1.31rem;font-family:PingFangSC-Regular;color:rgba(153,153,153,1);"> {{siteName}}</span>
+                    </div>
+                </div>
+            </div>
+            <div id="qrcodeCanvas" >
+            </div>
+        </div>
+
+        <div class="d-flex flex-row justify-content-center width-percent100" style="margin-top: 2rem;" >
+            <button type="button" class="btn create_button copy-share-group"  data-local-value="copyGroupQrcodeUrlTip">Copy Group Url</button>
+            <button type="button" class="btn create_button save-share-group" data-local-value="saveGroupQrcodeImg">Save Qrcode</button>
+        </div>
 </script>

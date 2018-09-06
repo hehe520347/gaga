@@ -66,7 +66,7 @@ class Api_Group_InvitableFriendsController extends Api_Group_BaseController
     ///TODO 理论上 加群的时候，不会返回已经在群里的人
     private function getInvitableFriendsFromDB($groupId, $offset, $pageSize)
     {
-        $result = $this->ctx->SiteUserTable->getUserList($groupId, $offset, $pageSize);
+        $result = $this->ctx->SiteUserTable->getUserListNotInGroup($groupId, $offset, $pageSize);
         return $result;
     }
 

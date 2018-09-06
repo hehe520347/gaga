@@ -71,7 +71,45 @@ class SiteUserTable extends BaseTable
             $this->ctx->Wpf_Logger->writeSqlLog($tag, $sql, $loginName, $startTime);
             return $user;
         } catch (Exception $ex) {
-            $this->ctx->Wpf_Logger->error($tag, "error_msg=" . $ex->getMessage());
+            $this->ctx->Wpf_Logger->error($tag, "error_msg=" . $ex);
+            return false;
+        }
+    }
+
+    public function getUserByLoginNameLowercase($loginNameLowercase)
+    {
+        $tag = __CLASS__ . "-" . __FILE__;
+        $startTime = microtime(true);
+        try {
+            $sql = "select $this->selectColumns from $this->table where loginNameLowercase=:loginNameLowercase;";
+            $prepare = $this->db->prepare($sql);
+            $this->handlePrepareError($tag, $prepare);
+            $prepare->bindValue(":loginNameLowercase", $loginNameLowercase);
+            $prepare->execute();
+            $user = $prepare->fetch(\PDO::FETCH_ASSOC);
+            $this->ctx->Wpf_Logger->writeSqlLog($tag, $sql, $loginNameLowercase, $startTime);
+            return $user;
+        } catch (Exception $ex) {
+            $this->ctx->Wpf_Logger->error($tag, "error_msg=" . $ex);
+            return false;
+        }
+    }
+
+    public function getUserByPhoneId($phoneId)
+    {
+        $tag = __CLASS__ . "-" . __FILE__;
+        $startTime = microtime(true);
+        try {
+            $sql = "select $this->selectColumns from $this->table where phoneId=:phoneId;";
+            $prepare = $this->db->prepare($sql);
+            $this->handlePrepareError($tag, $prepare);
+            $prepare->bindValue(":phoneId", $phoneId);
+            $prepare->execute();
+            $user = $prepare->fetch(\PDO::FETCH_ASSOC);
+            $this->ctx->Wpf_Logger->writeSqlLog($tag, $sql, $phoneId, $startTime);
+            return $user;
+        } catch (Exception $ex) {
+            $this->ctx->Wpf_Logger->error($tag, "error_msg=" . $ex);
             return false;
         }
     }
@@ -128,7 +166,34 @@ class SiteUserTable extends BaseTable
 
     }
 
-    public function getUserList($groupId, $offset, $pageSize)
+    public function getSiteUserListByOffset($offset, $length)
+    {
+        $startTime = microtime(true);
+        $tag = __CLASS__ . "-" . __FUNCTION__;
+        $sql = "select  
+                        $this->selectColumns 
+                    from 
+                        siteUser 
+                    order by id DESC limit :offset, :length";
+        try {
+            $prepare = $this->db->prepare($sql);
+            $this->handlePrepareError($tag, $prepare);
+
+            $prepare->bindValue(":offset", $offset);
+            $prepare->bindValue(":length", $length);
+            $prepare->execute();
+            $result = $prepare->fetchAll(\PDO::FETCH_ASSOC);
+
+            return $result;
+        } catch (Exception $ex) {
+            $this->ctx->Wpf_Logger->error($tag, "error_msg=" . $ex);
+            return false;
+        } finally {
+            $this->ctx->Wpf_Logger->writeSqlLog($tag, $sql, [$offset, $length], $startTime);
+        }
+    }
+
+    public function getUserListNotInGroup($groupId, $offset, $pageSize)
     {
         try {
             $startTime = microtime(true);

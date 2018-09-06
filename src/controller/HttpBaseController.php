@@ -25,36 +25,24 @@ abstract class HttpBaseController extends \Wpf_Controller
         "page.js",
         "page.siteConfig",
         "page.loginSite",
+        "page.jump"
     ];
+    private $groupType = "g";
+    private $u2Type = "u";
+    private $jumpRoomType = "";
+    private $jumpRoomId = "";
+    private $jumpRelation="";
+
     public function __construct(Wpf_Ctx $context)
     {
 
         if(!$this->checkDBIsExist()) {
-            $initDBUrl = ZalyConfig::getConfig("initDB");
-            header("Location:" . $initDBUrl);
+            $initUrl = ZalyConfig::getApiPageSiteInit();
+            header("Location:" . $initUrl);
             exit();
         }
 
         $this->ctx = new BaseCtx();
-    }
-
-    public function checkDBIsExist()
-    {
-        $fileName = dirname(__FILE__) . "/../config.php";
-        $config = require($fileName);
-
-        $sqliteName = $config['sqlite']['sqliteDBName'];
-
-        if(empty($sqliteName)) {
-            return false;
-        }
-
-        $sqliteName = dirname(__FILE__).'/../'.$sqliteName;
-
-        if(file_exists($sqliteName)) {
-            return true;
-        }
-        return false;
     }
 
 
@@ -70,10 +58,20 @@ abstract class HttpBaseController extends \Wpf_Controller
             parent::doIndex();
             $preSessionId = isset($_GET['preSessionId']) ? $_GET['preSessionId'] : "";
 
+            $x = isset($_GET['x']) ? $_GET['x'] : "";
+
             if ($preSessionId) {
                 $this->handlePreSessionId();
                 $apiPageIndex = ZalyConfig::getApiPageIndexUrl();
-                header("Location:" . $apiPageIndex);
+                if($x) {
+                    if (strpos($apiPageIndex, "?")) {
+                        header("Location:" . $apiPageIndex."&x=".$x);
+                    } else {
+                        header("Location:" . $apiPageIndex."?x=".$x);
+                    }
+                } else {
+                    header("Location:" . $apiPageIndex);
+                }
                 exit();
             }
             $action = isset($_GET['action']) ? $_GET['action'] : "";
@@ -81,6 +79,7 @@ abstract class HttpBaseController extends \Wpf_Controller
             if(!in_array($action, $this->whiteAction)) {
                 $this->getUserIdByCookie();
             }
+            $this->getJumpUrl();
             $this->index();
         }catch (Exception $ex){
             $this->ctx->Wpf_Logger->error($tag, "error msg =" . $ex->getMessage());
@@ -98,6 +97,34 @@ abstract class HttpBaseController extends \Wpf_Controller
                 $this->userId = $userProfile["userId"];
                 $this->setCookieBase64($this->userId);
             }
+        }
+    }
+
+    public function getJumpUrl()
+    {
+        $tag = __CLASS__ . "-" . __FUNCTION__;
+
+        try{
+            $x = isset($_GET['x']) ? $_GET['x'] : "";
+            if(!$x) {
+                return ;
+            }
+            list($type, $id) = explode("-", $x);
+            if($id == $this->userId) {
+                return;
+            }
+            if($type == $this->groupType) {
+                $this->jumpRoomType = "MessageRoomGroup";
+                $isInGroupFlag = $this->ctx->SiteGroupTable->getGroupProfile($id, $this->userId);
+                $this->jumpRelation = $isInGroupFlag != false ? 1 : 0;
+            }elseif($type == $this->u2Type) {
+                $this->jumpRoomType = "MessageRoomU2";
+                $isFriendFlag = $this->ctx->SiteUserFriendTable->isFollow($this->userId, $id);
+                $this->jumpRelation = $isFriendFlag > 0  ? 1 : 0;
+            }
+            $this->jumpRoomId = $id;
+        }catch (Exception $ex) {
+            $this->ctx->Wpf_Logger->error($tag, "error msg =" . $ex->getMessage());
         }
     }
 
@@ -147,9 +174,18 @@ abstract class HttpBaseController extends \Wpf_Controller
 
     public function setLogout()
     {
+        $x = isset($_GET['x']) ? $_GET['x'] : "";
         setcookie ("zaly_site_user", "", time()-3600, "/", "", false, true);
         $apiPageLogin = ZalyConfig::getApiPageLoginUrl();
-        header("Location:".$apiPageLogin);
+        if($x) {
+            if (strpos($apiPageLogin, "?")) {
+                header("Location:" . $apiPageLogin."&x=".$x);
+            } else {
+                header("Location:" . $apiPageLogin."?x=".$x);
+            }
+        } else {
+            header("Location:" . $apiPageLogin);
+        }
         exit();
     }
 
@@ -172,10 +208,15 @@ abstract class HttpBaseController extends \Wpf_Controller
         $params['user_id']   = $this->userId;
         $params['nickname']  = $this->userInfo['nickname'] ? $this->userInfo['nickname'] : "匿名";
         $params['loginName'] = ZalyHelper::hideMobile($this->userInfo['loginName']);
-        $params['avatar'] = $this->userInfo['avatar'];
+        $params['avatar']   = $this->userInfo['avatar'];
+        $params['jumpPage'] = ZalyConfig::getApiPageJumpUrl();
         if(!isset($params['login'])) {
             $params['login'] = '';
         }
+        $params['jumpRoomId'] = $this->jumpRoomId;
+        $params['jumpRoomType'] = $this->jumpRoomType;
+        $params['jumpRelation'] = $this->jumpRelation;
+
         return parent::display($viewName, $params);
     }
 
@@ -184,5 +225,21 @@ abstract class HttpBaseController extends \Wpf_Controller
         $cookieAes = $this->ctx->ZalyAes->encrypt($userId, $this->ctx->ZalyAes->cookieKey);
         $cookieBase64 = base64_encode($cookieAes);
         setcookie("zaly_site_user", $cookieBase64, time() + $this->sessionIdTimeOut, "/", "", false, true);
+    }
+
+
+    /**
+     * 查库操作
+     */
+    public function getSiteConfigFromDB($columns)
+    {
+        try {
+            $results = $this->ctx->SiteConfigTable->selectSiteConfig($columns);
+            return $results;
+        } catch (Exception $e) {
+            $tag = __CLASS__ . "-" . __FUNCTION__;
+            $this->ctx->Wpf_Logger->error($tag, " errorMsg = " . $e->getMessage());
+            return [];
+        }
     }
 }

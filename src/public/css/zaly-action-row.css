@@ -24,7 +24,6 @@
 }
 
 .action-btn {
-    width: 6rem;
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -48,12 +47,12 @@
 
 }
 
-.group-desc, .user-desc {
+.group-desc, .user-desc, .group-name {
     padding: 0.94rem;
     width:100%;
 }
 
-.group-desc-title, .user-desc-title {
+.group-desc-title, .user-desc-title, .group-name-title {
     font-size:1.5rem;
     color:rgba(20,16,48,1);
     font-weight: bold;

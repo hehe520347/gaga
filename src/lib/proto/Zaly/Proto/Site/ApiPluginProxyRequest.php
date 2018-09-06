@@ -29,13 +29,17 @@ class ApiPluginProxyRequest extends \Google\Protobuf\Internal\Message
      */
     private $method = 0;
     /**
-     * Generated from protobuf field <code>string body = 4;</code>
+     * Generated from protobuf field <code>bytes body = 4;</code>
      */
     private $body = '';
     /**
      * Generated from protobuf field <code>string cookie = 5;</code>
      */
     private $cookie = '';
+    /**
+     * Generated from protobuf field <code>map<string, string> headers = 6;</code>
+     */
+    private $headers;
 
     public function __construct() {
         \GPBMetadata\Site\ApiPluginProxy::initOnce();
@@ -109,7 +113,7 @@ class ApiPluginProxyRequest extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>string body = 4;</code>
+     * Generated from protobuf field <code>bytes body = 4;</code>
      * @return string
      */
     public function getBody()
@@ -118,13 +122,13 @@ class ApiPluginProxyRequest extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>string body = 4;</code>
+     * Generated from protobuf field <code>bytes body = 4;</code>
      * @param string $var
      * @return $this
      */
     public function setBody($var)
     {
-        GPBUtil::checkString($var, True);
+        GPBUtil::checkString($var, False);
         $this->body = $var;
 
         return $this;
@@ -148,6 +152,28 @@ class ApiPluginProxyRequest extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->cookie = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>map<string, string> headers = 6;</code>
+     * @return \Google\Protobuf\Internal\MapField
+     */
+    public function getHeaders()
+    {
+        return $this->headers;
+    }
+
+    /**
+     * Generated from protobuf field <code>map<string, string> headers = 6;</code>
+     * @param array|\Google\Protobuf\Internal\MapField $var
+     * @return $this
+     */
+    public function setHeaders($var)
+    {
+        $arr = GPBUtil::checkMapField($var, \Google\Protobuf\Internal\GPBType::STRING, \Google\Protobuf\Internal\GPBType::STRING);
+        $this->headers = $arr;
 
         return $this;
     }

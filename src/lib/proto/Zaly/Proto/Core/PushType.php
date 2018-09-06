@@ -14,12 +14,12 @@ class PushType
      */
     const PushDisabled = 0;
     /**
-     * Generated from protobuf enum <code>PushNotificationOnly = 2;</code>
+     * Generated from protobuf enum <code>PushNotificationOnly = 1;</code>
      */
-    const PushNotificationOnly = 2;
+    const PushNotificationOnly = 1;
     /**
-     * Generated from protobuf enum <code>PushWithMessageContent = 3;</code>
+     * Generated from protobuf enum <code>PushWithMessageContent = 2;</code>
      */
-    const PushWithMessageContent = 3;
+    const PushWithMessageContent = 2;
 }
 

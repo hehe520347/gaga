@@ -57,7 +57,6 @@ class  Api_Friend_ApplyController extends BaseController
     private function checkIsFriend($toUserId)
     {
         $isFriend = $this->ctx->SiteUserFriendTable->isFriend($this->userId, $toUserId);
-        error_log("users isFriend ===" . $isFriend);
         if ($isFriend) {
             $errorCode = $this->zalyError->errorFriendApplyFriendExists;
             $errorInfo = $this->zalyError->getErrorInfo($errorCode);

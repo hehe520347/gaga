@@ -14,11 +14,13 @@ use Google\Protobuf\Internal\GPBUtil;
 class ApiPlatformLoginResponse extends \Google\Protobuf\Internal\Message
 {
     /**
-     * user flag, tell page is display  userInfo or not
-     *
-     * Generated from protobuf field <code>.platform.LoginUserType loginUserType = 1;</code>
+     * Generated from protobuf field <code>string preSessionId = 1;</code>
      */
-    private $loginUserType = 0;
+    private $preSessionId = '';
+    /**
+     * Generated from protobuf field <code>string loginName = 2;</code>
+     */
+    private $loginName = '';
 
     public function __construct() {
         \GPBMetadata\Platform\ApiPlatformLogin::initOnce();
@@ -26,27 +28,45 @@ class ApiPlatformLoginResponse extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * user flag, tell page is display  userInfo or not
-     *
-     * Generated from protobuf field <code>.platform.LoginUserType loginUserType = 1;</code>
-     * @return int
+     * Generated from protobuf field <code>string preSessionId = 1;</code>
+     * @return string
      */
-    public function getLoginUserType()
+    public function getPreSessionId()
     {
-        return $this->loginUserType;
+        return $this->preSessionId;
     }
 
     /**
-     * user flag, tell page is display  userInfo or not
-     *
-     * Generated from protobuf field <code>.platform.LoginUserType loginUserType = 1;</code>
-     * @param int $var
+     * Generated from protobuf field <code>string preSessionId = 1;</code>
+     * @param string $var
      * @return $this
      */
-    public function setLoginUserType($var)
+    public function setPreSessionId($var)
     {
-        GPBUtil::checkEnum($var, \Zaly\Proto\Platform\LoginUserType::class);
-        $this->loginUserType = $var;
+        GPBUtil::checkString($var, True);
+        $this->preSessionId = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>string loginName = 2;</code>
+     * @return string
+     */
+    public function getLoginName()
+    {
+        return $this->loginName;
+    }
+
+    /**
+     * Generated from protobuf field <code>string loginName = 2;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setLoginName($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->loginName = $var;
 
         return $this;
     }

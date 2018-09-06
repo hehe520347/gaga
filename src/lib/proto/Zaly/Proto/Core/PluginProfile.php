@@ -49,6 +49,10 @@ class PluginProfile extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>.core.PluginPermissionType permissionType = 9;</code>
      */
     private $permissionType = 0;
+    /**
+     * Generated from protobuf field <code>string userSessionId = 10;</code>
+     */
+    private $userSessionId = '';
 
     public function __construct() {
         \GPBMetadata\Core\Plugin::initOnce();
@@ -249,6 +253,28 @@ class PluginProfile extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkEnum($var, \Zaly\Proto\Core\PluginPermissionType::class);
         $this->permissionType = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>string userSessionId = 10;</code>
+     * @return string
+     */
+    public function getUserSessionId()
+    {
+        return $this->userSessionId;
+    }
+
+    /**
+     * Generated from protobuf field <code>string userSessionId = 10;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setUserSessionId($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->userSessionId = $var;
 
         return $this;
     }

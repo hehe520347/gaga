@@ -16,6 +16,7 @@ class PassportPasswordTable extends BaseTable
         "nickname",
         "email",
         "password",
+        "invitationCode",
         "timeReg"
     ];
 

@@ -39,12 +39,12 @@ class Site_Config
      * get administrator,site has just one administrator
      * @return null
      */
-    public function getSiteAdmin()
+    public function getSiteOwner()
     {
-        $adminValue = $this->ctx->SiteConfigTable->selectSiteConfig(SiteConfig::SITE_ADMIN);
+        $adminValue = $this->ctx->SiteConfigTable->selectSiteConfig(SiteConfig::SITE_OWNER);
 
         if (isset($adminValue)) {
-            return $adminValue[SiteConfig::SITE_ADMIN];
+            return $adminValue[SiteConfig::SITE_OWNER];
         }
 
         return null;
@@ -59,7 +59,7 @@ class Site_Config
     {
         $managers = [];
 
-        $admin = $this->getSiteAdmin();
+        $admin = $this->getSiteOwner();
 
         if (isset($admin)) {
             $managers[] = $admin;

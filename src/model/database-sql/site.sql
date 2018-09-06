@@ -17,18 +17,18 @@ CREATE TABLE sitePlugin(
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               pluginId INTEGER NOT NULL,
               name VARCHAR(100) NOT NULL, /*名字*/
-              `logo` TEXT NOT NULL,/*logo*/
-              `order` INTEGER,/*排序 数值越小，排位靠前*/
-              `landingPageUrl` TEXT,/*落地页*/
-              `landingPageWithProxy` LONG, /*是否使用resp加载落地页*/
+              logo TEXT NOT NULL,/*logo*/
+              sort INTEGER,/*排序 数值越小，排位靠前*/
+              landingPageUrl TEXT,/*落地页*/
+              landingPageWithProxy LONG, /*是否使用resp加载落地页*/
               usageType INTEGER,          /*功能类型*/
               loadingType INTEGER,/*展现方式*/
-               permissionType INTEGER ,    /*使用权限*/
-               authKey VARCHAR(32) NOT NULL,
-               addTime BIGINT,
-               UNIQUE(pluginId,usageType)
+              permissionType INTEGER ,    /*使用权限*/
+              authKey VARCHAR(32) NOT NULL,
+              addTime BIGINT,
+              UNIQUE(pluginId,usageType)
               );
-CREATE INDEX IF NOT EXISTS indexSitePluginOrder ON sitePlugin("order");
+CREATE INDEX IF NOT EXISTS indexSitePluginSort ON sitePlugin("sort");
 
 
 /*默认插入insert*/
@@ -139,3 +139,15 @@ CREATE TABLE IF NOT EXISTS siteGroupMessagePointer(
             );
 
 CREATE INDEX IF NOT EXISTS indexSiteGroupMessagePointerGud ON siteGroupMessagePointer(groupId,userId,deviceId);
+
+
+CREATE TABLE IF NOT EXISTS siteUic(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            code VARCHAR(50) unique NOT NULL,
+            userId VARCHAR(100),
+            status INTEGER, -- 0：无效，1：所有人可用 2：会员可用等
+            createTime BIGINT,
+            useTime BIGINT
+            );
+
+CREATE INDEX IF NOT EXISTS indexSiteUicUserId ON siteUic(userId);

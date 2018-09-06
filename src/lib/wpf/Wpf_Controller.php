@@ -52,10 +52,26 @@ abstract class Wpf_Controller {
     {
         $requestTransportData = $this->requestTransportData;
         $headers = $requestTransportData->getHeader();
-        if(!isset($headers[TransportDataHeaderKey::HeaderUserClientLang]) || $headers[TransportDataHeaderKey::HeaderUserClientLang] == "zh-cn") {
+        if(!isset($headers[TransportDataHeaderKey::HeaderUserClientLang])
+            || ($headers[TransportDataHeaderKey::HeaderUserClientLang] == \Zaly\Proto\Core\UserClientLangType::UserClientLangZH)) {
             $this->zalyError = $this->ctx->ZalyErrorZh;
         } else {
             $this->zalyError = $this->ctx->ZalyErrorEn;
         }
+    }
+
+    public function checkDBIsExist()
+    {
+        $sqliteInfo = ZalyConfig::getConfig("sqlite");
+        $sqliteName = $sqliteInfo['sqliteDBName'];
+        if(empty($sqliteName)) {
+            return false;
+        }
+        $sqliteName = dirname(__FILE__).'/../../'.$sqliteName;
+        if(file_exists($sqliteName)) {
+            return true;
+        }
+
+        return false;
     }
 }

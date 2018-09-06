@@ -31,13 +31,14 @@ class Api_Site_LoginController extends \BaseController
             $loginName = $request->getLoginName();
             $userExists = $this->checkUserExists($loginName);
             $isRegister = $request->getIsRegister();
+            $this->ctx->Wpf_Logger->info("api.site.login", " =========userExists=" . $userExists);
 
             if (!$userExists && $isRegister == false) {
                 $errorCode = $this->zalyError->errorUserNeedRegister;
                 $errorInfo = $this->zalyError->getErrorInfo($errorCode);
                 $this->setRpcError($errorCode, $errorInfo);
                 $this->rpcReturn($transportData->getAction(), new $this->classNameForResponse());
-                die();
+                return;
             }
 
             $preSessionId = $request->getPreSessionId();
@@ -47,8 +48,8 @@ class Api_Site_LoginController extends \BaseController
                 throw new Exception("with error parameters");
             }
 
-            $this->ctx->Wpf_Logger->info("api.site.login", " -preSessionId=" . $preSessionId);
-            $this->ctx->Wpf_Logger->info("api.site.login", " -devicePubkPem=" . $devicePubkPem);
+            $this->ctx->Wpf_Logger->info("api.site.login", " =========preSessionId=" . $preSessionId);
+//            $this->ctx->Wpf_Logger->info("api.site.login", " -devicePubkPem=" . $devicePubkPem);
 
             if (!$preSessionId) {
                 $errorCode = $this->zalyError->errorSession;
@@ -60,13 +61,13 @@ class Api_Site_LoginController extends \BaseController
             //get user profile from platform
             $userProfile = $this->ctx->Site_Login->checkPreSessionIdFromPlatform($preSessionId, $devicePubkPem);
 
-            //if current user is first user of site,init siteConfig
-            $this->checkSiteSettedConfig($userProfile);
-
             $realSessionId = $userProfile['sessionId'];
             $this->ctx->Wpf_Logger->info("api.site.login", "get platform sessionid=" . $realSessionId);
 
             $response = $this->buildApiSiteLoginResponse($userProfile, $realSessionId);
+
+
+            $this->ctx->Wpf_Logger->info("api.site.login", "response=" . $response->serializeToJsonString());
 
             //back to request
             $this->setRpcError($this->defaultErrorCode, "");
@@ -74,10 +75,13 @@ class Api_Site_LoginController extends \BaseController
         } catch (Exception $ex) {
             $errorCode = $this->zalyError->errorSession;
             $errorInfo = $this->zalyError->getErrorInfo($errorCode);
+            $this->ctx->Wpf_Logger->error($tag, "=========error=" . $ex->getMessage());
+
             $this->setRpcError($errorCode, $errorInfo);
-            $this->ctx->Wpf_Logger->error($tag, "error_msg=" . $ex->getMessage());
             $this->rpcReturn($transportData->getAction(), new $this->classNameForResponse());
         }
+
+        return;
     }
 
     private function buildApiSiteLoginResponse($userInfo, $sessionId)
@@ -107,27 +111,17 @@ class Api_Site_LoginController extends \BaseController
         }
     }
 
-    private function checkSiteSettedConfig($userProfile)
-    {
-        $admin = $this->ctx->Site_Config->getSiteAdmin();
-
-        if (empty($admin)) {
-            //if no admin ,think it's first user
-            $firstUserId = $userProfile['userId'];
-            $this->ctx->Wpf_Logger->info("api.site.login", "set site admin=" . $firstUserId);
-            $this->ctx->SiteConfigTable->updateSiteConfig(SiteConfig::SITE_ADMIN, $firstUserId);
-        }
-    }
-
     private function checkUserExists($loginName)
     {
         try {
             $user = $this->ctx->SiteUserTable->getUserByLoginName($loginName);
-            if (!$user) {
+
+            if ($user) {
                 return true;
             }
             return false;
         } catch (Exception $ex) {
+            $this->ctx->Wpf_Logger->error("api.site.login", "error_msg=" . $ex->getMessage());
             return false;
         }
     }

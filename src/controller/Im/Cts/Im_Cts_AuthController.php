@@ -71,7 +71,7 @@ class Im_Cts_AuthController extends Im_BaseController
 
             $this->rpcReturn($transportData->getAction(), new $this->classNameForCtsAuthResponse());
         }catch (Exception $ex) {
-            error_log($tag, "error_msg ==" .$ex->getMessage());
+            $this->ctx->Wpf_Logger->error($tag, "error_msg ==" .$ex->getMessage());
         }
     }
 

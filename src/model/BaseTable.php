@@ -143,8 +143,8 @@ class BaseTable
                 "error_code" => $this->db->errorCode(),
                 "error_info" => $this->db->errorInfo(),
             ];
-//            $this->ctx->Wpf_Logger->error($tag, $error);
-            throw new Exception("execute prepare fail");
+            $this->ctx->Wpf_Logger->error($tag, json_encode($error));
+            throw new Exception("execute prepare fail" . json_encode($error));
         }
 
     }

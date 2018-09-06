@@ -38,18 +38,20 @@ class SiteConfigTable extends BaseTable
     public function updateSiteConfig($configKey, $configValue)
     {
         $tag = __CLASS__ . "->" . __FUNCTION__;
-        $sql = "update $this->table set configValue=:configValue where configKey=:configKey;";
-
-        $prepare = $this->db->prepare($sql);
-        $this->handlePrepareError($tag, $prepare);
-        $prepare->bindValue(":configValue", $configValue);
-        $prepare->bindValue(":configKey", $configKey);
-
-        $result = $prepare->execute();
-        $count = $prepare->rowCount();
-
-        if ($result && $count > 0) {
-            return true;
+        try {
+            $tag = __CLASS__ . "->" . __FUNCTION__;
+            $sql = "update $this->table set configValue=:configValue where configKey=:configKey;";
+            $prepare = $this->db->prepare($sql);
+            $this->handlePrepareError($tag, $prepare);
+            $prepare->bindValue(":configValue", $configValue);
+            $prepare->bindValue(":configKey", $configKey);
+            $result = $prepare->execute();
+            $count = $prepare->rowCount();
+            if ($result && $count > 0) {
+                return true;
+            }
+        } finally {
+            $this->ctx->Wpf_Logger->writeSqlLog($tag, $sql, [$configKey, $configValue], $this->getCurrentTimeMills());
         }
 
         return false;
@@ -66,9 +68,9 @@ class SiteConfigTable extends BaseTable
             $startTime = microtime(true);
             if ($configKey === false) {
                 $sql = "select $this->columns from $this->table;";
-            } elseif(is_string($configKey)) {
+            } elseif (is_string($configKey)) {
                 $sql = "select $this->columns from $this->table where configKey=:configKey;";
-            } elseif(is_array($configKey)){
+            } elseif (is_array($configKey)) {
                 $configKeyStr = implode("','", $configKey);
                 $sql = "select $this->columns from $this->table where configKey in ('$configKeyStr');";
             }

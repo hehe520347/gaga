@@ -4,7 +4,7 @@
 
 var ZalyAction = {
 
-    action_url : "index.php?action=ActionName&body_format=json",
+    action_url : "./index.php?action=ActionName&body_format=json",
 
     api_group_create : "site.ApiGroupCreateRequest",
     api_site_config  : "site.ApiSiteConfigRequest",
@@ -38,6 +38,7 @@ var ZalyAction = {
     api_passport_passwordLogin : "site.ApiPassportPasswordLoginRequest",
     api_passport_passwordFindPassword :"site.ApiPassportPasswordFindPasswordRequest",
     api_passport_passwordResetPassword :"site.ApiPassportPasswordResetPasswordRequest",
+    duckchat_message_send : "plugin.DuckChatMessageSendRequest",
 
     im_stc_news :"im.stc.news",
     im_stc_message_key :"im.stc.message",

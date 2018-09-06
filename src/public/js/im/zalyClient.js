@@ -45,7 +45,8 @@ function handleClientSendRequest(action, reqData, callback, isHttp)
         var header = {};
         header[HeaderSessionid] = sessionId;
         header[HeaderHostUrl] = originDomain;
-        
+        header[HeaderUserClientLang] = languageName = navigator.language == "en-US" ? "0" : "1";
+
         var packageId = localStorage.getItem(PACKAGE_ID);
 
         var transportData = {
@@ -59,6 +60,7 @@ function handleClientSendRequest(action, reqData, callback, isHttp)
 
         this.callback = callback;
         var transportDataJson = JSON.stringify(transportData);
+
         var enableWebsocketGW = localStorage.getItem(websocketGW);
         if(enableWebsocketGW == "true" && !isHttp  && wsUrl != null && wsUrl) {
             putWsQueue(transportDataJson, callback);
@@ -70,7 +72,11 @@ function handleClientSendRequest(action, reqData, callback, isHttp)
                 method: "POST",
                 url:requestUrl,
                 data: transportDataJson,
-                success:function (resp) {
+                success:function (resp, status, request) {
+                    var debugInfo = request.getResponseHeader('duckchat-debugInfo');
+                    if(debugInfo != null) {
+                        console.log("debug-info ==" + debugInfo);
+                    }
                     handleClientReceivedMessage(resp, callback);
                 }
             });

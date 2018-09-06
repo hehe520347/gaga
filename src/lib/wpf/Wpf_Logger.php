@@ -15,16 +15,31 @@ class Wpf_Logger
         "sql"
     ];
 
-    private $fileName = 'openzaly-site-log';
-    private $filePath = '/akaxin';////TODO 需要修改
+    private $errorLevel = "error";
+    private $warnLevel  = "warn";
+    private $infoLevel  = "info";
+    private $sqlLevel   = "sql";
+
+    private $fileName = 'duckchat-site';
     private $handler = '';
     private $logType = "";
+
+    private $debugInfoHeader = "duckchat-debugInfo";
+
+    private $debugMode;
 
     public function __construct()
     {
         $this->fileName = $this->fileName . "-" . date("Ymd") . ".log";
+
+        $this->filePath = ZalyConfig::getConfig("logPath");
+        if($this->filePath == ".") {
+            $this->filePath = dirname(__DIR__)."/../logs/";
+        }
         $this->filePath = $this->filePath . "/" . $this->fileName;
-//        $this->handler = fopen($this->filePath, "a+");
+        $this->handler = fopen($this->filePath, "a+");
+
+        $this->debugMode = ZalyConfig::getConfig("debugMode");
     }
 
     /**
@@ -34,7 +49,7 @@ class Wpf_Logger
      */
     public function info($tag, $infoMsg)
     {
-        $this->logType = "info";
+        $this->logType = $this->infoLevel;
         $this->writeLog($tag, $infoMsg);
     }
 
@@ -45,7 +60,7 @@ class Wpf_Logger
      */
     public function warn($tag, $infoMsg)
     {
-        $this->logType = "warn";
+        $this->logType = $this->warnLevel;
         $this->writeLog($tag, $infoMsg);
     }
 
@@ -56,7 +71,7 @@ class Wpf_Logger
      */
     public function error($tag, $infoMsg)
     {
-        $this->logType = "error";
+        $this->logType = $this->errorLevel;
         $this->writeLog($tag, $infoMsg);
     }
 
@@ -67,6 +82,7 @@ class Wpf_Logger
      */
     private function writeLog($tag, $msg)
     {
+
         if (!in_array($this->logType, $this->_level)) {
             return;
         }
@@ -76,8 +92,15 @@ class Wpf_Logger
         }
 
         $content = "[$this->logType] " . date("Y-m-d H:i:s") . " $tag $msg \n";
-//        fwrite($this->handler, $content);
-        error_log($content);
+
+        if($this->debugMode == true) {
+            header($this->debugInfoHeader.":".$content);
+            fwrite($this->handler, $content);
+        }
+
+        if($this->debugMode == false && $this->logType == $this->errorLevel) {
+            fwrite($this->handler, $content);
+        }
 
     }
 
@@ -86,11 +109,16 @@ class Wpf_Logger
         if (is_array($params)) {
             $params = json_encode($params);
         }
-        $this->logType = "sql";
+        $this->logType = $this->sqlLevel;
         $expendTime = microtime(true) - $startTime;
+
         $content = "[$this->logType] " . date("Y-m-d H:i:s") . " $tag  sql=$sql  params=$params  expend_time=$expendTime\n";
-//        fwrite($this->handler, $content);
-        error_log($content);
+
+        if($this->debugMode == true) {
+            header($this->debugInfoHeader.":".$content);
+            fwrite($this->handler, $content);
+            return;
+        }
     }
 
     public function dbLog($tag, $sql, $params = [], $startTime = 0, $result)
@@ -102,15 +130,16 @@ class Wpf_Logger
         if (is_array($result)) {
             $result = json_encode($result);
         }
-
-
-        $this->logType = "sql";
+        $this->logType = $this->sqlLevel;
         $expendTime = microtime(true) - $startTime;
         $content = "[$this->logType] "
             . date("Y-m-d H:i:s")
             . " $tag  sql=$sql  params=$params  expend_time=$expendTime "
             . "result=$result \n";
-
-        error_log($content);
+        if($this->debugMode == true) {
+            header($this->debugInfoHeader.":".$content);
+            fwrite($this->handler, $content);
+            return;
+        }
     }
 }

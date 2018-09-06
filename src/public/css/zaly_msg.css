@@ -123,6 +123,7 @@ html, body{
     box-shadow:-0.09rem 0rem 0.38rem 0rem rgba(223,223,223,1);
     flex-shrink: 0;
     border-left: 0.1rem solid rgba(223,223,223,1);
+    overflow-y: scroll;
 }
 
 .right-chatbox {
@@ -194,9 +195,13 @@ html, body{
 .left-body-create-group {
     display: flex;
     flex-direction: column;
-    height:9.17rem;
+    height:10rem;
     background:rgba(255,255,255,1);
-    position: relative;
+    position: absolute;
+    bottom: 0;
+    width: 28rem;
+    border:0.09rem solid rgba(255,255,255,1);
+    box-shadow: 0rem -0.09rem 0.38rem 0rem rgba(223,223,223,1);
 }
 
 .left-body-chatsession{
@@ -206,7 +211,7 @@ html, body{
     overflow-y: scroll;
     display: block;
     box-shadow:0rem 0.09rem 0.38rem 0rem rgba(0,0,0,0.2);
-
+    margin-bottom: 10rem;
 }
 
 .create-group-btn {
@@ -242,6 +247,7 @@ html, body{
 .emotions,
 .upload-img,
 .send_msg,
+.add-friend-btn,
 .create_button {
     cursor: pointer;
 }
@@ -465,6 +471,7 @@ html, body{
     padding-bottom: 0rem;
     height: 3.2rem;
     display: flex;
+    margin-left: 1rem;
 }
 
 .right-input .input-tools img {
@@ -1208,7 +1215,7 @@ html, body{
 .copy-share-group:hover,
 .copy-share-group:after,
 .copy-share-group:focus {
-    width:14.07rem;
+    width:11.26rem;
     height:4.69rem;
     border-radius:0.47rem;
     border:0.09rem solid rgba(76,59,177,1);
@@ -1218,13 +1225,17 @@ html, body{
     background:rgba(255,255,255,1);
     cursor: pointer;
     outline: none;
+    margin-bottom: 5rem;
+    margin-right:3rem;
+    margin-left: 25rem;
+    margin-top:1rem;
 }
 
 .save-share-group,
 .save-share-group:hover,
 .save-share-group:active,
 .save-share-group:focus {
-    width:14.07rem;
+    width:11.26rem;
     height:4.69rem;
     background:rgba(76,59,177,1);
     border-radius:0.47rem;
@@ -1234,6 +1245,8 @@ html, body{
     line-height: 4.69rem;
     cursor: pointer;
     outline: none;
+    margin-bottom: 5rem;
+    margin-top:1rem;
 }
 
 .edit_remark_for_friend,.apply-friend {
@@ -1246,6 +1259,10 @@ html, body{
     margin-top: 7rem;
     cursor: pointer;
 }
+#selfInfoDiv {
+    width: 38rem;
+    height:25rem;
+}
 
 .selfNickNameDiv {
     text-align: left;
@@ -1254,14 +1271,24 @@ html, body{
     margin-left: 0rem;
     text-align: center;
 }
-#selfNickname {
+.selfNickNameDiv .nickname {
+    font-size:1.88rem;
+    font-family:PingFangSC-Medium;
+    font-weight:500;
+    color:rgba(20,16,48,1);
     margin-left: 0rem;
     margin-top: 0rem;
     text-align: center;
-    font-size:1.5rem;
-    color:rgba(20,16,48,1);
 }
-
+.selfNickNameDiv .loginName {
+    font-size:1.13rem;
+    font-family:PingFangSC-Regular;
+    font-weight:400;
+    color:rgba(102,102,102,1);
+    margin-left: 0rem;
+    margin-top: 0rem;
+    text-align: center;
+}
 button:active{
     outline: none;
 }
@@ -1275,6 +1302,66 @@ button:active{
     cursor: pointer;
 }
 
+.app_download {
+    width: 2rem;
+    height:3rem;
+}
+
 .preemptiveVersionDiv {
+    cursor: pointer;
+}
+
+.appDownload {
+    cursor: pointer;
+    text-align: center;
+    width:8rem;
+    left:-0.3rem;
+    position: absolute;
+    bottom:2rem;
+    cursor: pointer;
+}
+
+.qrcodeCanvas {
+    width:23rem;
+    height: 23rem;
+    text-align: center;
+    background:rgba(255,255,255,1);
+    box-shadow:0rem 0.19rem 0.75rem 0.09rem rgba(223,223,223,1);
+    border-radius:0.56rem;
+    padding:1rem 0rem 0rem 1rem ;
+}
+
+.group_avatar {
+    width:6rem;
+    height:6rem;
+    border-radius: 50%;
+}
+
+.group-profile-desc {
+    position: absolute;
+    visibility: visible;
+    width: 100%;
+    margin-bottom: 2rem;
+    margin-left: 0.5rem;
+}
+.add-friend-div-img{
+    margin-top: 5rem;
+    text-align: center;
+    position: relative
+}
+.user-nickname-for-add{
+    text-align: center;
+    position: relative;
+    font-size:1.31rem;
+    font-family:PingFangSC-Regular;
+    color:rgba(20,16,48,1);
+}
+.qrcodeCanvas-title {
+    display: flex;
+    margin-bottom: 3rem;
+    justify-content: left;
+}
+
+.web-msg-click {
     cursor: pointer;
 }
