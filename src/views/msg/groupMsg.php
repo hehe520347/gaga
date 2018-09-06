@@ -69,7 +69,6 @@
         var whdef = 10.66/1440;// 1440,使用10.66PX的默认值
         var wW = window.innerWidth;// 当前窗口的宽度
         var rem = wW * whdef;// 以默认比例值乘以当前窗口宽度,得到该宽度下的相应FONT-SIZE值
-        console.log("rem ==" + rem);
         if(rem < 8) {
             rem = 8;
         }
@@ -90,14 +89,13 @@
     });
 
     var languageName = navigator.language == "en-US" ? "en" : "zh";
-    languageName = "zh";
 
-    // var languageName = "zh";
+    var languageName = "zh";
     jQuery.i18n.properties({
-        name: "zh",
+        name: "lang",
         path: '../../public/js/config/',
         mode: 'map',
-        language: "",
+        language: languageName,
         callback: function () {
             try {
                 //初始化页面元素

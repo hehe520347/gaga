@@ -422,3 +422,34 @@
             <button type="button" class="btn create_button save-share-group" data-local-value="saveGroupQrcodeImg">Save Qrcode</button>
         </div>
 </script>
+
+<script id="tpl-add-friend-div" type="text/html">
+
+        <div class="flex-container justify-content-center" >
+            <div class="header_tip_font  align-items-center" style="margin-top: 6rem;" data-local-value="addFriendTip">Add Friend</div>
+        </div>
+
+        <div class="d-flex flex-row justify-content-center add-friend-div-img"  >
+            <img  class="user-image-for-add" src="../../public/img/msg/default_user.png" style="width: 8rem; height: 8rem;" />
+        </div>
+        <div class="d-flex flex-row justify-content-center user-nickname-for-add">
+            {{nickname}}
+        </div>
+
+        <div class="d-flex flex-row justify-content-center" >
+            <input type="text" class="form-control  create_group_box_div_input apply-friend-reason" data-local-placeholder="addFriendReasonPlaceholder"  placeholder="Please Enter Introduce" >
+        </div>
+
+        <div class="line"></div>
+
+        <div class="d-flex flex-row justify-content-center width-percent100 margin-top10" style="text-align:center; ">
+            <button type="button" class="btn create_button apply-friend" data-local-value="sendTip">Send</button>
+        </div>
+
+    </script>
+
+
+
+<script id="tpl-string" type="text/html">
+   {{string}}
+</script>

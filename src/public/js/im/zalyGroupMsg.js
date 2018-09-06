@@ -609,6 +609,9 @@ $(document).on("click", ".group-profile", function () {
         return ;
     }
     var groupName = $('.nickname_'+groupId).html();
+    groupName = template("tpl-string", {
+        string : groupName
+    });
     $(".chatsession-title").html(groupName);
 
     sendGroupProfileReq(groupId, handleGetGroupProfileByClick);
@@ -653,6 +656,9 @@ function handleClickRowGroupProfile(groupId)
     sendGroupProfileReq(groupId, handleGetGroupProfileByClick);
 
     var groupName = $('.nickname_'+groupId).html();
+    groupName = template("tpl-string", {
+            string : groupName
+    });
     $(".chatsession-title").html(groupName);
 
     insertGroupRoom(groupId, groupName);
@@ -668,12 +674,14 @@ $(document).on("click", ".u2-profile", function () {
     $(".user-image-for-add").attr("class", "user-image-for-add");
     $(".user-image-for-add").attr("src", "../../public/img/msg/default_user.png");
 
-    var nickname = $('.nickname_'+userId).html();
+    var friendProfile = getFriendProfile(userId, true);
+    var nickname = template("tpl-string", {
+        string : friendProfile.nickname
+    });
     $(".chatsession-title").html(nickname);
 
     localStorage.setItem(chatSessionIdKey, userId);
     localStorage.setItem(userId, U2_MSG);
-    sendFriendProfileReq(userId);
     handleMsgRelation($(this), userId);
 });
 
@@ -828,7 +836,7 @@ function handleGetGroupProfile(result)
     }
 }
 
-function getFriendProfile(userId)
+function getFriendProfile(userId, isForceSend)
 {
     var friendInfoReqKey = reqProfile + userId;
     var nowTimestamp = Date.parse(new Date());
@@ -846,7 +854,7 @@ function getFriendProfile(userId)
             return userProfile;
         }
     }
-    if(reqProfileTime != false && reqProfileTime != null && (nowTimestamp-reqProfileTime<reqTimeout)) {
+    if(reqProfileTime != false && reqProfileTime != null && (nowTimestamp-reqProfileTime<reqTimeout) && isForceSend == false) {
         return false;
     }
     sessionStorage.setItem(friendInfoReqKey, nowTimestamp);
@@ -1157,7 +1165,12 @@ function groupCreateSuccess(results) {
     localStorage.setItem(chatSessionIdKey, groupProfile.id);
     localStorage.setItem(groupProfile.id, GROUP_MSG);
 
-    $(".chatsession-title").html(groupProfile.name);
+    var groupName = groupProfile.name;
+    groupName = template("tpl-string", {
+        string : groupName
+    });
+
+    $(".chatsession-title").html(groupName);
     handleGetGroupProfile(results);
     insertGroupRoom(groupProfile.id, groupProfile.name);
     handleMsgRelation(undefined, groupProfile.id);
@@ -1288,7 +1301,7 @@ function updateInfo(profileId, profileType)
     var name ;
     var mute;
     if(profileType == U2_MSG) {
-        var friendProfile = getFriendProfile(profileId);
+        var friendProfile = getFriendProfile(profileId, false);
         name = friendProfile != false && friendProfile != null ? friendProfile.nickname : "";
         getNotMsgImg(friendProfile.userId, friendProfile.avatar);
     } else {
@@ -1298,8 +1311,13 @@ function updateInfo(profileId, profileType)
     }
 
     var muteKey= msgMuteKey+profileId;
-    mute = localStorage.getItem(muteKey)
+    mute = localStorage.getItem(muteKey);
+    var name = template("tpl-string", {
+        string : name
+    });
+
     $(".nickname_"+profileId).html(name);
+
     try{
         if(mute>0) {
             $(".room-chatsession-mute_"+profileId)[0].style.display = "block";
@@ -1327,11 +1345,15 @@ function displayCurrentProfile()
             $(".add_friend")[0].style.display="inline";
             $(".user-image-for-add").addClass("info-avatar-"+chatSessionId);
 
-            var friendProfile = getFriendProfile(chatSessionId);
+            var friendProfile = getFriendProfile(chatSessionId, false);
 
             if(friendProfile) {
-                $(".chatsession-title").html(friendProfile.nickname);
-                $(".user-desc-body").html(friendProfile.nickname);
+                var nickname = friendProfile.nickname;
+                nickname = template("tpl-string", {
+                    string : nickname
+                });
+                $(".chatsession-title").html(nickname);
+                $(".user-desc-body").html(nickname);
             } else {
                 $(".chatsession-title").html("");
                 $(".user-desc-body").html("");
@@ -1352,9 +1374,6 @@ function displayCurrentProfile()
                 $(".mute-friend")[0].style.display = "none";
                 $(".add_friend")[0].style.display = "inline";
             }
-
-            $(".chatsession-title").html(friendProfile.nickname);
-            $(".nickname_"+chatSessionId).html(friendProfile.name);
 
             getNotMsgImg(friendProfile.userId, friendProfile.avatar);
 
@@ -1377,14 +1396,17 @@ function displayCurrentProfile()
             getNotMsgImg(groupProfile.id, groupProfile.avatar);
 
             if(groupProfile != false && groupProfile != null) {
-                $(".chatsession-title").html(groupProfile.name);
-                $(".nickname_"+groupProfile.id).html(groupProfile.name);
-                $(".groupName").html(groupProfile.name);
+                var groupName = groupProfile.name
+                groupName = template("tpl-string", {
+                    string : groupName
+                });
+                $(".chatsession-title").html(groupName);
+                $(".nickname_"+groupProfile.id).html(groupName);
+                $(".groupName").html(groupName);
             }
 
             $("#share_group").removeClass();
             $("#share_group").addClass("info-avatar-"+groupProfile.id);
-
 
             $(".group-desc-body").html("");
 
@@ -1397,9 +1419,13 @@ function displayCurrentProfile()
                         $(".mark_down").attr("src", "../../public/img/msg/icon_switch_on.png");
                         $(".mark_down").attr("is_on", "on");
                     } else {
+                        descBody = template("tpl-string", {
+                            string:descBody
+                        });
                         $(".mark_down").attr("src", "../../public/img/msg/icon_switch_off.png");
                         $(".mark_down").attr("is_on", "off");
                     }
+
                     $(".group-desc-body").html(descBody);
                 } else {
                     $(".mark_down").attr("src", "../../public/img/msg/icon_switch_off.png");
@@ -1557,7 +1583,7 @@ function hideGroupUserMenu()
 $(document).on("click", ".edit-remark", function () {
     var userId = localStorage.getItem(chatSessionIdKey);
     $("#edit-remark").attr("userId", userId);
-    var userProfile = getFriendProfile(userId);
+    var userProfile = getFriendProfile(userId, false);
     if(userProfile) {
         $(".remark_name").val(userProfile['nickname']);
     }
@@ -1786,12 +1812,17 @@ $(document).on("click", "#add-friend", function () {
 
 function displayAddFriend(userId)
 {
+
     $("#add-friend-div").attr("userId", userId);
     $(".user-image-for-add").addClass("info-avatar-"+userId);
     $(".user-nickname-for-add").addClass("nickname_"+userId);
 
-    sendFriendProfileReq(userId);
-    $(".apply-friend-reason").val("");
+    var friendProfile = getFriendProfile(userId, true);
+    var nickname = friendProfile != false ? friendProfile.nickname : "";
+    var html = template("tpl-add-friend-div", {
+       "nickname" : nickname
+    });
+    $("#add-friend-div").html(html);
     showWindow($('#add-friend-div'));
 }
 

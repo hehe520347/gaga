@@ -6,7 +6,7 @@
  * Time: 4:37 PM
  */
 
-class Duckchat_User_ProfileController extends BaseController
+class Duckchat_User_ProfileController extends Duckchat_MiniProgramController
 {
     private $classNameForRequest = '\Zaly\Proto\Plugin\DuckChatUserProfileRequest';
     private $classNameForResponse = '\Zaly\Proto\Plugin\DuckChatUserProfileResponse';

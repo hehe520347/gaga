@@ -127,10 +127,10 @@
 
     var languageName = "zh";
     jQuery.i18n.properties({
-        name: languageName,
+        name: "lang",
         path: '../../public/js/config/',
         mode: 'map',
-        language: "",
+        language: languageName,
         callback: function () {
             try {
                 //初始化页面元素

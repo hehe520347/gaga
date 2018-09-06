@@ -38,7 +38,7 @@ class InstallDBController
             $sqliteName = dirname(__FILE__) . '/../' . $sqliteName;
             $isInstalled = file_exists($sqliteName);
             if ($isInstalled) {
-                $apiPageIndex = ZalyConfig::getApiPageIndexUrl();
+                $apiPageIndex = ZalyConfig::getConfig("apiPageIndex");
                 header("Location:" . $apiPageIndex);
                 exit();
             }

@@ -12,7 +12,6 @@ class Duckchat_Message_SendController extends Duckchat_MiniProgramController
     private $classNameForRequest = '\Zaly\Proto\Plugin\DuckChatMessageSendRequest';
     private $classNameForResponse = '\Zaly\Proto\Plugin\DuckChatMessageSendResponse';
     private $requestAction = "duckchat.message.send";
-    private $imStcMessagAction = "im.stc.message";
 
     private $isGroupRoom = false;
     private $toId;
@@ -75,9 +74,6 @@ class Duckchat_Message_SendController extends Duckchat_MiniProgramController
 
     private function returnMessage($msgId, $msgRoomType, $msgType, $message, $fromUserId, $toUserId, $result)
     {
-        //echo data
-        $this->returnMessageStatus($this->sessionId, $msgId, $msgRoomType, $result);
-
         $this->finish_request();
 
         //send friend news
@@ -92,7 +88,6 @@ class Duckchat_Message_SendController extends Duckchat_MiniProgramController
     //return if group is not lawful
     private function returnGroupNotLawfulMessage($msgId, $msgRoomType, $fromUserId, $groupId, $noticeText)
     {
-        $this->returnMessageStatus($this->sessionId, $msgId, $msgRoomType, false);
         //finish request
         $this->finish_request();
 
@@ -101,7 +96,6 @@ class Duckchat_Message_SendController extends Duckchat_MiniProgramController
         //send im.stc.news to client
         $this->ctx->Message_News->tellClientNews(false, $fromUserId);
     }
-
 
     //check group-message if lawful
     private function checkGroupExisted($groupId)
@@ -129,37 +123,6 @@ class Duckchat_Message_SendController extends Duckchat_MiniProgramController
                 return $text->getBody();
         }
         return '';
-    }
-
-    /**
-     * @param $sessionId
-     * @param $msgId
-     * @param $msgRoomType
-     * @param bool $result
-     */
-    protected function returnMessageStatus($sessionId, $msgId, $msgRoomType, $result)
-    {
-        $tag = __CLASS__ . "->" . __FUNCTION__;
-        $this->ctx->Wpf_Logger->info($tag, "sessionId=" . $sessionId);
-        $responseStatusMessage = new Zaly\Proto\Client\ImStcMessageRequest();
-
-        $statusMsg = new \Zaly\Proto\Core\StatusMessage();
-        $statusMsg->setMsgId($msgId);
-        $status = $result ? \Zaly\Proto\Core\MessageStatus::MessageStatusServer : \Zaly\Proto\Core\MessageStatus::MessageStatusFailed;
-        $statusMsg->setStatus($status);
-
-        $message = new \Zaly\Proto\core\Message();
-        $message->setMsgId($msgId);
-        $message->setRoomType($msgRoomType);
-        $message->setTimeServer($this->ctx->ZalyHelper->getMsectime());
-        $message->setType(\Zaly\Proto\Core\MessageType::MessageEventStatus);
-        $message->setStatus($statusMsg);
-
-        $list = [$message];
-        $responseStatusMessage->setList($list);
-
-        $this->setRpcError($this->defaultErrorCode, "");
-        $this->rpcReturn($this->imStcMessagAction, $responseStatusMessage);
     }
 
 }
